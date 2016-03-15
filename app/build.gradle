@@ -1,0 +1,55 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        applicationId "cn.nekocode.murmur"
+        minSdkVersion 15
+        targetSdkVersion 23
+        versionCode 127
+        versionName projectVersion
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile kotlib
+    compile project(":data")
+    compile "com.github.nekocode:kotgo:0.6.0"
+
+    // Android support library
+    compile "com.android.support:appcompat-v7:$supportLibVersion"
+    compile "com.android.support:recyclerview-v7:$supportLibVersion"
+
+    // Reactive library
+    compile "io.reactivex:rxkotlin:0.40.1"
+    compile "io.reactivex:rxandroid:1.1.0"
+
+    // DSL
+    compile 'org.jetbrains.anko:anko-sdk15:0.8.3' // sdk19, sdk21, sdk23 are also available
+    compile 'org.jetbrains.anko:anko-support-v4:0.8.3' // In case you need support-v4 bindings
+    compile 'org.jetbrains.anko:anko-appcompat-v7:0.8.3' // For appcompat-v7 bindings
+
+    compile "com.squareup.picasso:picasso:2.5.2"
+    compile 'uk.co.chrisjenx:calligraphy:2.1.0'
+    compile 'com.pnikosis:materialish-progress:1.7'
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlinVersion"
+    }
+}
