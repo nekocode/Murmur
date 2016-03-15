@@ -12,6 +12,7 @@ import cn.nekocode.murmur.data.model.DoubanSongModel
 import cn.nekocode.murmur.data.model.MurmurModel
 import cn.nekocode.murmur.util.Util.randomPick
 import rx.Observable
+import rx.Subscription
 
 
 class MainPresenter(val view: MainPresenter.ViewInterface): Presenter(view) {
@@ -26,19 +27,26 @@ class MainPresenter(val view: MainPresenter.ViewInterface): Presenter(view) {
 
     fun init() {
         fetechMurmurs()
-        fetechMusic()
+        nextSong()
     }
 
     fun fetechMurmurs() {
-        MurmurModel.getMurmurs().bind(this).subscribe({
+        val oldSubscription = MurmurModel.getMurmurs().bind(this).subscribe({
             val murmurs = it.randomPick(2)
             App.musicSerivice?.playMurmurs(murmurs)
             view.murmursChange(murmurs)
         }, errorHandler)
+
+        oldSubscription.isUnsubscribed
     }
 
-    fun fetechMusic() {
-        DoubanSongModel.nextSong().bind(this).subscribe({
+    var oldSubscription: Subscription? = null
+    fun nextSong() {
+        if(oldSubscription != null && oldSubscription!!.isUnsubscribed) {
+            oldSubscription?.unsubscribe()
+        }
+
+        oldSubscription = DoubanSongModel.nextSong().bind(this).subscribe({
             App.musicSerivice?.playSong(it)
             view.songChange(it)
         }, errorHandler)

@@ -23,6 +23,7 @@ import cn.nekocode.murmur.view.ShaderRenderer
 import com.pnikosis.materialishprogress.ProgressWheel
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
+import org.jetbrains.anko.dip
 import kotlin.properties.Delegates
 
 class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchListener {
@@ -108,28 +109,53 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
 
     val gestureDetector by lazy {
         GestureDetector(activity, object: GestureDetector.OnGestureListener {
+            val FLING_MIN_DISTANCE = dip(100)
+            val FLING_MIN_DISTANCE_Y = dip(150)
+            val FLING_MIN_VELOCITY = 1
+
+            var lastestTapTime = 0L
             override fun onSingleTapUp(p0: MotionEvent?): Boolean {
-                throw UnsupportedOperationException()
+                val nowTapTime = System.currentTimeMillis();
+                if (nowTapTime - lastestTapTime < 800) {
+                    Toast.makeText(activity, "Double tap", Toast.LENGTH_SHORT).show()
+
+                    lastestTapTime = 0;
+                    return false;
+                }
+
+                lastestTapTime = nowTapTime;
+                return true;
             }
 
             override fun onDown(p0: MotionEvent?): Boolean {
-                throw UnsupportedOperationException()
+                return true
             }
 
-            override fun onFling(p0: MotionEvent?, p1: MotionEvent?, p2: Float, p3: Float): Boolean {
-                throw UnsupportedOperationException()
+            override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+                if (Math.abs(e1.y - e2.y) > FLING_MIN_DISTANCE_Y)
+                    return false
+
+                if (e1.x - e2.x > FLING_MIN_DISTANCE
+                        && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
+                    //向右滑动
+                    presenter.nextSong()
+                } else if (e2.x - e1.x > FLING_MIN_DISTANCE
+                        && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
+                    //向左滑动
+                    presenter.nextSong()
+                }
+
+                return false
             }
 
             override fun onScroll(p0: MotionEvent?, p1: MotionEvent?, p2: Float, p3: Float): Boolean {
-                throw UnsupportedOperationException()
+                return true
             }
 
             override fun onShowPress(p0: MotionEvent?) {
-                throw UnsupportedOperationException()
             }
 
             override fun onLongPress(p0: MotionEvent?) {
-                throw UnsupportedOperationException()
             }
 
         })
