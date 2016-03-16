@@ -29,6 +29,7 @@ dependencies {
     // Android support library
     compile "com.android.support:appcompat-v7:$supportLibVersion"
     compile "com.android.support:recyclerview-v7:$supportLibVersion"
+    compile "com.android.support:palette-v7:$supportLibVersion"
 
     // Reactive library
     compile "io.reactivex:rxkotlin:0.40.1"

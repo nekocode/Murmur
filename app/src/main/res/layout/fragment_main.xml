@@ -26,7 +26,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Aamurmur!"
+                android:text="Loading"
                 android:textColor="@color/white"
                 android:textSize="34sp"
                 android:id="@+id/titleTextView"
@@ -36,7 +36,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="- playing"
+                tools:text="performer"
                 android:id="@+id/performerTextView"
                 android:textColor="@color/white"
                 android:layout_marginTop="4dp"
@@ -46,7 +46,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Model : Both"
+            tools:text="Murmurs"
             android:id="@+id/murmursTextView"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"

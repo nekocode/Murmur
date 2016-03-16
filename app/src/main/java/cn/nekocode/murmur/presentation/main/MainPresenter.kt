@@ -26,18 +26,18 @@ class MainPresenter(val view: MainPresenter.ViewInterface): Presenter(view) {
     }
 
     fun init() {
-        fetechMurmurs()
-        nextSong()
-    }
+        Observable.combineLatest(MurmurModel.getMurmurs(), DoubanSongModel.nextSong(), {
+            murmurs, song ->
+            Pair(murmurs, song)
+        }).bind(this).subscribe({
+            val murmurs = it.first.randomPick(2)
+            val song = it.second
 
-    fun fetechMurmurs() {
-        val oldSubscription = MurmurModel.getMurmurs().bind(this).subscribe({
-            val murmurs = it.randomPick(2)
             App.musicSerivice?.playMurmurs(murmurs)
+            App.musicSerivice?.playSong(song)
             view.murmursChange(murmurs)
+            view.songChange(song)
         }, errorHandler)
-
-        oldSubscription.isUnsubscribed
     }
 
     var oldSubscription: Subscription? = null
