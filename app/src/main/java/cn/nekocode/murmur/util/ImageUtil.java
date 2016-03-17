@@ -167,23 +167,27 @@ public class ImageUtil {
 		return d;
 	}
 	
-	public static Bitmap getCircleBitmap(Bitmap bmp) {
-		Bitmap output = Bitmap.createBitmap(bmp.getWidth(), bmp.getHeight(),
-				Config.ARGB_8888);
+	public static Bitmap getCircleBitmap(Bitmap source) {
+		int minSize = Math.min(source.getWidth(), source.getHeight());
+
+		Bitmap output = Bitmap.createBitmap(minSize, minSize, Config.ARGB_8888);
 		Canvas canvas = new Canvas(output);
 
 		final Paint paint = new Paint();
-		final Rect rect = new Rect(0, 0, bmp.getWidth(), bmp.getHeight());
+		final Rect srcRect = new Rect(
+				(source.getWidth()-minSize)/2,
+				(source.getHeight()-minSize)/2,
+				minSize, minSize);
+		final Rect dstRect = new Rect(0, 0, minSize, minSize);
 
 		paint.setAntiAlias(true);
 		paint.setFilterBitmap(true);
 		paint.setDither(true);
 		canvas.drawARGB(0, 0, 0, 0);
 		paint.setColor(Color.parseColor("#BAB399"));
-		canvas.drawCircle(bmp.getWidth() / 2 + 0.7f,
-				bmp.getHeight() / 2 + 0.7f, bmp.getWidth() / 2 + 0.1f, paint);
+		canvas.drawCircle(minSize / 2.0f, minSize / 2.0f, minSize / 2.0f, paint);
 		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
-		canvas.drawBitmap(bmp, rect, rect, paint);
+		canvas.drawBitmap(source, srcRect, dstRect, paint);
 
 		return output;
 	}
