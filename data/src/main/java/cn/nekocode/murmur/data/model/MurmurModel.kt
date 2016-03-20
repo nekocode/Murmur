@@ -22,14 +22,14 @@ object MurmurModel {
                             it.file.url = DataLayer.mediaProxy.getProxyUrl(it.file.url)
                             it
                         }
-                    }
-                    .doOnEach {
-                        if(it.kind == Notification.Kind.OnNext) {
-                            Hawk.put("murmurs", it.value)
-                        }
+
+                        Hawk.put("murmurs", murmurs)
+                        murmurs
                     }
                     .onErrorResumeNext {
                         val list: List<Murmur>? = Hawk.get("murmurs")
+                        list ?: throw Exception("Get murmurs error.")
+
                         Observable.just(list)
                     }
 

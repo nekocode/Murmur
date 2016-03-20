@@ -3,6 +3,7 @@ package cn.nekocode.murmur.presentation.main
 import android.animation.Animator
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
+import android.app.ProgressDialog
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -10,6 +11,8 @@ import android.opengl.GLSurfaceView
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.graphics.Palette
+import android.text.TextUtils
+import android.util.Patterns
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -19,6 +22,7 @@ import android.view.animation.LinearInterpolator
 import android.widget.*
 import butterknife.bindView
 import cn.nekocode.kotgo.component.presentation.BaseFragment
+import cn.nekocode.kotgo.component.util.showToast
 import cn.nekocode.murmur.R
 import cn.nekocode.murmur.data.dto.DoubanSong
 import cn.nekocode.murmur.data.dto.Murmur
@@ -28,9 +32,7 @@ import cn.nekocode.murmur.view.ShaderRenderer
 import com.pnikosis.materialishprogress.ProgressWheel
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
-import org.jetbrains.anko.backgroundColor
-import org.jetbrains.anko.dip
-import org.jetbrains.anko.textColor
+import org.jetbrains.anko.*
 import kotlin.properties.Delegates
 
 class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchListener {
@@ -48,6 +50,8 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
     val murmursTextView: TextView by bindView(R.id.murmursTextView)
     val timeTextView: TextView by bindView(R.id.timeTextView)
 
+    var loginProgressDialog by Delegates.notNull<ProgressDialog>()
+
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupGLSufaceview()
@@ -56,35 +60,103 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
         oldBackgroundColor = resources.getColor(R.color.color_primary)
         oldTextColor = Color.WHITE
 
+        loginProgressDialog = ProgressDialog(activity).apply {
+            setMessage("Loging...")
+            setCancelable(false)
+        }
+
         presenter.init()
     }
 
-    private fun setupGLSufaceview() {
+    fun setupGLSufaceview() {
         surfaceView.setEGLContextClientVersion(2)
         surfaceView.setOnTouchListener(this)
 
         val shader = resources.openRawResource(R.raw.shader).reader().readText()
 
-        renderer = ShaderRenderer(activity, shader)
-        renderer.setBackColor(resources.getColor(R.color.color_primary_dark))
-        renderer.setSpeed(0.6f)
-        surfaceView.setRenderer(renderer)
+        renderer = ShaderRenderer(activity, shader).apply {
+            setBackColor(resources.getColor(R.color.color_primary_dark))
+            setSpeed(0.6f)
+
+            surfaceView.setRenderer(this)
+        }
     }
 
-    private fun setupCoverView() {
+    fun setupCoverView() {
         coverImageView.setFactory {
-            val imageView = ImageView(activity)
-            imageView.scaleType = ImageView.ScaleType.FIT_XY
-            imageView.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT)
-            imageView
+            ImageView(activity).apply {
+                scaleType = ImageView.ScaleType.FIT_XY
+                layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT)
+            }
         }
 
-        coverImageView.inAnimation = AnimationUtils.loadAnimation(activity, android.R.anim.fade_in)
-        coverImageView.outAnimation = AnimationUtils.loadAnimation(activity, android.R.anim.fade_out)
-        coverImageView.inAnimation.duration = ANIMATION_DURATION
-        coverImageView.outAnimation.duration = ANIMATION_DURATION
-        coverImageView.setImageResource(R.drawable.transparent)
+        coverImageView.apply {
+            inAnimation = AnimationUtils.loadAnimation(activity, android.R.anim.fade_in)
+            inAnimation.duration = ANIMATION_DURATION
+
+            outAnimation = AnimationUtils.loadAnimation(activity, android.R.anim.fade_out)
+            outAnimation.duration = ANIMATION_DURATION
+
+            setImageResource(R.drawable.transparent)
+        }
+    }
+
+    override fun showLoginDialog() {
+        AlertDialogBuilder(activity).apply {
+            title("Login Your Douban Account")
+            cancellable(false)
+
+            var emailEdit: EditText? = null
+            var pwdEdit: EditText? = null
+            customView {
+                verticalLayout() {
+                    padding = dip(30)
+
+                    emailEdit = editText {
+                        hint = "Email"
+                        textSize = 14f
+                    }
+
+                    pwdEdit = editText {
+                        hint = "Password"
+                        textSize = 14f
+                    }
+                }
+            }
+            positiveButton {
+                val email = emailEdit?.text.toString()
+                val pwd = pwdEdit?.text.toString()
+
+                if(!isEmail(email)) {
+                    toast("Email address is invaild.")
+
+                } else if (TextUtils.isEmpty(pwd)) {
+                    toast("Password is invaild.")
+
+                } else {
+                    presenter.login(email, pwd)
+                    loginProgressDialog.show()
+                }
+            }
+        }.show()
+    }
+
+    override fun loginSuccess() {
+        loginProgressDialog.dismiss()
+    }
+
+    override fun loginFailed() {
+        showLoginDialog()
+        loginProgressDialog.dismiss()
+    }
+
+    fun isEmail(email: String): Boolean {
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    override fun toast(msg: String) {
+        showToast(msg)
     }
 
     override fun murmursChange(murmurs: List<Murmur>) {
@@ -106,23 +178,26 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
         }
 
         override fun onBitmapLoaded(bitmap: Bitmap?, p1: Picasso.LoadedFrom?) {
-            if(bitmap != null) {
-                switchPalette(bitmap)
-            }
+            bitmap ?: return
+
+            switchPalette(bitmap)
             coverImageView.setImageDrawable(ImageUtil.bitmap2Drawable(bitmap))
         }
     }
 
     override fun songChange(song: DoubanSong) {
-        isChangingPalette = true
+        isPaletteChanging = true
 
-        titleTextView.text = song.title
-        performerTextView.text = song.artist
-        timeTextView.text = song.length.toString()
+        song.apply {
+            titleTextView.text = title
+            performerTextView.text = artist
+            timeTextView.text = length.toString()
 
-        // TODO: FIX
-        Picasso.with(activity).cancelRequest(target)
-        Picasso.with(activity).load(song.picture).transform(CircleTransform()).into(target)
+            Picasso.with(activity).apply {
+                cancelRequest(target)
+                load(picture).transform(CircleTransform()).into(target)
+            }
+        }
 
         renderer.setSpeed(1.0f)
     }
@@ -133,36 +208,18 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
     var backgroundColorAnimator: ValueAnimator? = null
     var textColorAnimator: ValueAnimator? = null
 
-    private fun switchPalette(bitmap: Bitmap) {
+    fun switchPalette(bitmap: Bitmap) {
         Palette.from(bitmap).generate {
-            var swatch: Palette.Swatch? = null
-
-            while(swatch == null) {
-                swatch = it.darkVibrantSwatch
-                if(swatch != null)
-                    break
-
-                swatch = it.vibrantSwatch
-                if(swatch != null)
-                    break
-
-                swatch = it.darkMutedSwatch
-                if(swatch != null)
-                    break
-
-                swatch = it.lightMutedSwatch
-                if(swatch != null)
-                    break
-            }
+            val swatch = it.darkVibrantSwatch ?: it.vibrantSwatch ?: it.darkMutedSwatch ?: it.lightMutedSwatch
             swatch!!
 
-            fun createColorAnimator(sourceColor: Int, targetColor: Int, updateListener: (it: ValueAnimator)->Unit)
-                    : ValueAnimator {
-                val animator = ValueAnimator.ofObject(ArgbEvaluator(), sourceColor, targetColor)
-                animator.duration = ANIMATION_DURATION + 100
-                animator.interpolator = LinearInterpolator()
-                animator.addUpdateListener(updateListener)
-                return animator
+            fun createColorAnimator(sourceColor: Int,
+                                    targetColor: Int,
+                                    updateListener: (it: ValueAnimator)->Unit): ValueAnimator
+                    = ValueAnimator.ofObject(ArgbEvaluator(), sourceColor, targetColor).apply {
+                duration = ANIMATION_DURATION + 100
+                interpolator = LinearInterpolator()
+                addUpdateListener(updateListener)
             }
 
             backgroundColorAnimator?.cancel()
@@ -179,8 +236,6 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
             }
             backgroundColorAnimator?.start()
 
-            checkIsAnimationEnd(backgroundColorAnimator!!)
-
             textColorAnimator?.cancel()
             textColorAnimator = createColorAnimator(oldTextColor, swatch.titleTextColor) {
                 val color = it.animatedValue as Int
@@ -192,20 +247,22 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
                 progressWheel.barColor = color
 
                 oldTextColor = color
-                progressWheel.visibility = View.INVISIBLE
             }
             textColorAnimator?.start()
+
+            listenAnimation(textColorAnimator!!)
         }
     }
 
-    var isChangingPalette = false
-    fun checkIsAnimationEnd(animator: Animator) {
+    var isPaletteChanging = false
+    fun listenAnimation(animator: Animator) {
         animator.addListener(object: Animator.AnimatorListener {
             override fun onAnimationRepeat(animation: Animator?) {
             }
 
             override fun onAnimationEnd(animation: Animator?) {
-                isChangingPalette = false
+                isPaletteChanging = false
+                progressWheel.visibility = View.INVISIBLE
             }
 
             override fun onAnimationCancel(animation: Animator?) {
@@ -244,7 +301,7 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
             }
 
             override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
-                if (Math.abs(e1.y - e2.y) > FLING_MIN_DISTANCE_Y || isChangingPalette)
+                if (Math.abs(e1.y - e2.y) > FLING_MIN_DISTANCE_Y || isPaletteChanging)
                     return false
 
                 if (e1.x - e2.x > FLING_MIN_DISTANCE
