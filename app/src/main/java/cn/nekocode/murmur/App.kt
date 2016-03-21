@@ -5,9 +5,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.ServiceConnection
 import android.os.IBinder
-import cn.nekocode.kotgo.component.util.FileUtils
 import cn.nekocode.murmur.data.DataLayer
 import cn.nekocode.murmur.service.MusicService
+import com.squareup.leakcanary.LeakCanary
 import org.jetbrains.anko.intentFor
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig
 import kotlin.properties.Delegates
@@ -40,7 +40,7 @@ class App: Application() {
         super.onCreate()
         instance = this
 
-        FileUtils.createAppDirs(this)
+        LeakCanary.install(this)
         DataLayer.hook(this)
         bindService()
 

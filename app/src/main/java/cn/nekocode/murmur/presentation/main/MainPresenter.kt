@@ -1,61 +1,42 @@
 package cn.nekocode.murmur.presentation.main
 
-import cn.nekocode.kotgo.component.presentation.Presenter
-import cn.nekocode.kotgo.component.rx.RxLifecycle
-import cn.nekocode.kotgo.component.rx.bindLifecycle
-import cn.nekocode.kotgo.component.rx.onUI
+import android.os.Bundle
 import cn.nekocode.murmur.App
+import cn.nekocode.murmur.common.MyPresenter
 import cn.nekocode.murmur.data.dto.DoubanSong
 import cn.nekocode.murmur.data.dto.DoubanUser
 import cn.nekocode.murmur.data.dto.Murmur
 import cn.nekocode.murmur.data.exception.DoubanException
 import cn.nekocode.murmur.data.model.DoubanModel
 import cn.nekocode.murmur.data.model.MurmurModel
+import cn.nekocode.murmur.data.model.SettingModel
 import cn.nekocode.murmur.util.Util.randomPick
 import rx.Observable
-import rx.Subscription
+import java.util.*
 import kotlin.properties.Delegates
 
 
-class MainPresenter(val view: MainPresenter.ViewInterface): Presenter(view) {
-    interface ViewInterface: RxLifecycle.Getter {
+class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
+    interface ViewInterface: BaseViewInterface {
         fun showLoginDialog()
         fun loginSuccess()
         fun loginFailed()
         fun murmursChange(murmurs: List<Murmur>)
         fun songChange(song: DoubanSong)
+        fun changeTimedText(text: String)
 
-        fun toast(msg: String)
+        fun showToast(msg: String)
     }
 
     var user: DoubanUser by Delegates.notNull<DoubanUser>()
+    val murmurs = ArrayList<Murmur>()
+    val playingMurmurs = ArrayList<Murmur>()
 
-    val errorHandler: (Throwable)->Unit = {
-        when(it) {
-            is DoubanException -> {
-                if (it.err.equals("invalid_token")) {
-                    view.toast("You token has been invalid.\nYou must login again.")
-                    view.showLoginDialog()
-
-                } else {
-                    view.toast(it.err)
-                }
-            }
-
-            else -> {
-                if(it.message != null)
-                    view.toast(it.message!!)
-            }
-        }
-
-    }
-
-    fun init() {
+    override fun onCreate(savedState: Bundle?) {
         val cachedUser = DoubanModel.getCachedUserInfo()
 
         if(cachedUser == null) {
             view.showLoginDialog()
-
         } else {
             login(cachedUser.first, cachedUser.second)
         }
@@ -66,30 +47,39 @@ class MainPresenter(val view: MainPresenter.ViewInterface): Presenter(view) {
             murmurs, song ->
             Pair(murmurs, song)
 
-        }).bind(this).subscribe({
-            val murmurs = it.first.randomPick(2)
-            val song = it.second
+        }).bind().subscribe({
+            murmurs.addAll(it.first)
 
-            App.musicSerivice?.playMurmurs(murmurs)
+            val selectedMurmurs = SettingModel.loadSelectedMurmurs()
+            if(selectedMurmurs == null) {
+                playingMurmurs.addAll(it.first.randomPick(2))
+                SettingModel.saveSelectedMurmurs(playingMurmurs)
+            } else {
+                playingMurmurs.addAll(selectedMurmurs)
+            }
+
+            App.musicSerivice?.playMurmurs(playingMurmurs)
+            view.murmursChange(playingMurmurs)
+
+            val song = it.second
             App.musicSerivice?.playSong(song)
-            view.murmursChange(murmurs)
             view.songChange(song)
 
         }, errorHandler)
     }
 
     fun login(email: String, pwd: String) {
-        DoubanModel.login(email, pwd).bind(view).subscribe({
+        DoubanModel.login(email, pwd).bind().subscribe({
             user = it
             view.loginSuccess()
             fetchData()
 
         }, {
             when(it) {
-                is DoubanException -> view.toast(it.err)
+                is DoubanException -> view.showToast(it.err)
                 else -> {
                     if(it.message != null)
-                        view.toast(it.message!!)
+                        view.showToast(it.message!!)
                 }
             }
 
@@ -97,20 +87,48 @@ class MainPresenter(val view: MainPresenter.ViewInterface): Presenter(view) {
         })
     }
 
-    var oldSubscription: Subscription? = null
-
     fun nextSong() {
-        if(oldSubscription != null && oldSubscription!!.isUnsubscribed) {
-            oldSubscription?.unsubscribe()
-        }
-
-        oldSubscription = DoubanModel.nextSong(user).bind(this).subscribe({
+        DoubanModel.nextSong(user).bind().subscribe({
             App.musicSerivice?.playSong(it)
             view.songChange(it)
         }, errorHandler)
     }
 
-    fun <T> Observable<T>.bind(lifecycler: RxLifecycle.Getter): Observable<T> {
-        return this.onUI().bindLifecycle(lifecycler)
+    fun timedText(): String {
+        var text = "loading"
+        App.musicSerivice?.apply {
+            if(playingSong.song == null)
+                return@apply
+
+            val rest = (playingSong.player.duration - playingSong.player.currentPosition) / 1000
+
+            val m = rest / 60
+            val s = rest % 60
+
+            if(m != 0 && s != 0)
+                text = "$m:$s"
+        }
+
+        return text
+    }
+
+    val errorHandler: (Throwable)->Unit = {
+        when(it) {
+            is DoubanException -> {
+                if (it.err.equals("invalid_token")) {
+                    view.showToast("You token has been invalid.\nYou must login again.")
+                    view.showLoginDialog()
+
+                } else {
+                    view.showToast(it.err)
+                }
+            }
+
+            else -> {
+                if(it.message != null)
+                    view.showToast(it.message!!)
+            }
+        }
+
     }
 }

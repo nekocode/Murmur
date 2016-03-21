@@ -1,36 +1,25 @@
 package cn.nekocode.murmur.presentation.main
 
-import android.app.AlertDialog
-import android.content.Context
 import cn.nekocode.murmur.App
-import cn.nekocode.murmur.presentation.MySingleFragmentActivity
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
+import cn.nekocode.murmur.common.MySingleFragmentActivity
+import org.jetbrains.anko.alert
 
-class MainActivity: MySingleFragmentActivity() {
-    override val toolbarLayoutId = null
+class MainActivity: MySingleFragmentActivity<MainFragment>() {
     override val fragmentClass = MainFragment::class.java
 
-    override fun afterCreate() {
-    }
+    override fun onBackPressed() {
+        alert("Are you want to exit?") {
+            negativeButton("No") {  }
 
-    override fun attachBaseContext(newBase: Context) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase))
+            positiveButton("Yes") {
+                super.onBackPressed()
+            }
+        }.show()
     }
 
     override fun onDestroy() {
+        App.musicSerivice?.pauseSong()
+        App.musicSerivice?.stopAllMurmurs()
         super.onDestroy()
-    }
-
-    override fun onBackPressed() {
-        AlertDialog.Builder(this).setMessage("Are you want to exit?")
-        .setNegativeButton("No", {
-            dialog, which ->
-
-        }).setPositiveButton("Yes", {
-            dialog, which ->
-            App.musicSerivice?.pauseSong()
-            App.musicSerivice?.stopAllMurmurs()
-            super.onBackPressed()
-        }).show()
     }
 }

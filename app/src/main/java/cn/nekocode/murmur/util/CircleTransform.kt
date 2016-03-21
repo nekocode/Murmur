@@ -1,6 +1,6 @@
 package cn.nekocode.murmur.util
 
-import android.graphics.*
+import android.graphics.Bitmap
 import com.squareup.picasso.Transformation
 
 /**

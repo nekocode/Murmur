@@ -3,7 +3,9 @@ package cn.nekocode.murmur.service
 import android.app.Service
 import android.content.Intent
 import android.media.MediaPlayer
-import android.os.*
+import android.os.Binder
+import android.os.IBinder
+import cn.nekocode.kotgo.component.rx.RxBus
 import cn.nekocode.murmur.data.dto.DoubanSong
 import cn.nekocode.murmur.data.dto.Murmur
 
@@ -16,7 +18,7 @@ class MusicService: Service() {
     }
     override fun onBind(intent: Intent?): IBinder = MusicServiceBinder()
 
-    val playingSong = SongPlayer(DoubanSong("", "", "", "", 0, ""), MediaPlayer())
+    val playingSong = SongPlayer(null, MediaPlayer())
     var stopSong = false
     val playingMurmurs = hashMapOf<Murmur, MediaPlayer>()
     var stopMurmurs = false
@@ -29,12 +31,15 @@ class MusicService: Service() {
 
             val player = playingSong.player
             player.reset()
-            player.isLooping = true
             player.setDataSource(song.url)
             player.prepareAsync()
             player.setOnPreparedListener {
                 if(!stopSong)
                     it.start()
+            }
+
+            player.setOnCompletionListener {
+                RxBus.send("Play finished")
             }
 
         } else {
@@ -90,5 +95,5 @@ class MusicService: Service() {
         playingMurmurs.clear()
     }
 
-    data class SongPlayer(var song: DoubanSong, var player: MediaPlayer)
+    data class SongPlayer(var song: DoubanSong?, var player: MediaPlayer)
 }

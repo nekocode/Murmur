@@ -3,7 +3,9 @@ package cn.nekocode.murmur.presentation.main
 import android.animation.Animator
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
+import android.app.AlertDialog
 import android.app.ProgressDialog
+import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -13,16 +15,12 @@ import android.os.Bundle
 import android.support.v7.graphics.Palette
 import android.text.TextUtils
 import android.util.Patterns
-import android.view.GestureDetector
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.animation.AnimationUtils
 import android.view.animation.LinearInterpolator
 import android.widget.*
 import butterknife.bindView
 import cn.nekocode.kotgo.component.presentation.BaseFragment
-import cn.nekocode.kotgo.component.util.showToast
 import cn.nekocode.murmur.R
 import cn.nekocode.murmur.data.dto.DoubanSong
 import cn.nekocode.murmur.data.dto.Murmur
@@ -65,7 +63,36 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
             setCancelable(false)
         }
 
-        presenter.init()
+        async() {
+            while(!detached) {
+                fragmentUiThread {
+                    timeTextView.text = presenter.timedText()
+                }
+
+                Thread.sleep(1000)
+            }
+        }
+
+        presenter.onCreate(savedInstanceState)
+
+        // TODO: 移到 murmursChange()
+//        val booleans = BooleanArray(3)
+//        murmursTextView.onClick {
+//            AlertDialog.Builder(activity).apply {
+//                setMultiChoiceItems(
+//                        arrayOf("123", "321", "111"),
+//                        booleans
+//                ) { dialogInterface: DialogInterface, which: Int, isChecked: Boolean ->
+//
+//                }
+//            }.show()
+//        }
+    }
+
+    var detached = false
+    override fun onDetach() {
+        super.onDetach()
+        detached = true
     }
 
     fun setupGLSufaceview() {
@@ -102,13 +129,13 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
         }
     }
 
-    override fun showLoginDialog() {
-        AlertDialogBuilder(activity).apply {
-            title("Login Your Douban Account")
+    val loginDialog by lazy {
+        var emailEdit: EditText? = null
+        var pwdEdit: EditText? = null
+
+        val dialog = alert("Login Your Douban Account") {
             cancellable(false)
 
-            var emailEdit: EditText? = null
-            var pwdEdit: EditText? = null
             customView {
                 verticalLayout() {
                     padding = dip(30)
@@ -124,11 +151,31 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
                     }
                 }
             }
-            positiveButton {
+
+            positiveButton("Login") {}
+
+            onKey {
+                keyCode, keyEvent ->
+                if(keyCode == KeyEvent.KEYCODE_BACK && keyEvent.action == KeyEvent.ACTION_DOWN) {
+                    alert("Are you want to exit?") {
+                        negativeButton("No") {
+                        }
+
+                        positiveButton("Yes") {
+                            activity.finish()
+                        }
+                    }.show()
+                }
+                false
+            }
+        }.builder.create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val email = emailEdit?.text.toString()
                 val pwd = pwdEdit?.text.toString()
 
-                if(!isEmail(email)) {
+                if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                     toast("Email address is invaild.")
 
                 } else if (TextUtils.isEmpty(pwd)) {
@@ -137,9 +184,17 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
                 } else {
                     presenter.login(email, pwd)
                     loginProgressDialog.show()
+
+                    dialog.dismiss()
                 }
             }
-        }.show()
+        }
+
+        dialog
+    }
+
+    override fun showLoginDialog() {
+        loginDialog.show()
     }
 
     override fun loginSuccess() {
@@ -151,22 +206,17 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
         loginProgressDialog.dismiss()
     }
 
-    fun isEmail(email: String): Boolean {
-        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    }
-
-    override fun toast(msg: String) {
-        showToast(msg)
+    override fun showToast(msg: String) {
+        toast(msg)
     }
 
     override fun murmursChange(murmurs: List<Murmur>) {
-        var text = ""
-        val last = murmurs.lastOrNull()
-        murmurs.forEach {
-            text += it.name
-            if(it != last) text += ", "
+        murmursTextView.text = when(murmurs.size) {
+            0 -> "nothing"
+            1 -> "● ${murmurs[0].name}"
+            2 -> "● ${murmurs[0].name} ● ${murmurs[1].name}"
+            else -> "● ${murmurs[0].name} ● ${murmurs[1].name} ..."
         }
-        murmursTextView.text = text
     }
 
     val target = object: Target {
@@ -191,7 +241,6 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
         song.apply {
             titleTextView.text = title
             performerTextView.text = artist
-            timeTextView.text = length.toString()
 
             Picasso.with(activity).apply {
                 cancelRequest(target)
@@ -200,6 +249,10 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
         }
 
         renderer.setSpeed(1.0f)
+    }
+
+    override fun changeTimedText(text: String) {
+        timeTextView.text = text
     }
 
     val ANIMATION_DURATION = 800L
