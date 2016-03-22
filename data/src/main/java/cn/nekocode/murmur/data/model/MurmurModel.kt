@@ -18,11 +18,6 @@ object MurmurModel {
                     .subscribeOn(Schedulers.io())
                     .map {
                         val murmurs = it.results
-                        murmurs.map {
-                            it.file.url = DataLayer.mediaProxy.getProxyUrl(it.file.url)
-                            it
-                        }
-
                         Hawk.put("murmurs", murmurs)
                         murmurs
                     }

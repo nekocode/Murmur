@@ -76,17 +76,17 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
         presenter.onCreate(savedInstanceState)
 
         // TODO: 移到 murmursChange()
-//        val booleans = BooleanArray(3)
-//        murmursTextView.onClick {
-//            AlertDialog.Builder(activity).apply {
-//                setMultiChoiceItems(
-//                        arrayOf("123", "321", "111"),
-//                        booleans
-//                ) { dialogInterface: DialogInterface, which: Int, isChecked: Boolean ->
-//
-//                }
-//            }.show()
-//        }
+        val booleans = BooleanArray(3)
+        murmursTextView.onClick {
+            AlertDialog.Builder(activity).apply {
+                setMultiChoiceItems(
+                        arrayOf("123", "321", "111"),
+                        booleans
+                ) { dialogInterface: DialogInterface, which: Int, isChecked: Boolean ->
+
+                }
+            }.show()
+        }
     }
 
     var detached = false
@@ -213,9 +213,9 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
     override fun murmursChange(murmurs: List<Murmur>) {
         murmursTextView.text = when(murmurs.size) {
             0 -> "nothing"
-            1 -> "● ${murmurs[0].name}"
-            2 -> "● ${murmurs[0].name} ● ${murmurs[1].name}"
-            else -> "● ${murmurs[0].name} ● ${murmurs[1].name} ..."
+            1 -> "[${murmurs[0].name}]"
+            2 -> "[${murmurs[0].name}, ${murmurs[1].name}]"
+            else -> "[${murmurs[0].name}, ${murmurs[1].name}, ...]"
         }
     }
 

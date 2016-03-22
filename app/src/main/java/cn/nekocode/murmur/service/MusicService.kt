@@ -8,6 +8,8 @@ import android.os.IBinder
 import cn.nekocode.kotgo.component.rx.RxBus
 import cn.nekocode.murmur.data.dto.DoubanSong
 import cn.nekocode.murmur.data.dto.Murmur
+import com.danikula.videocache.HttpProxyCacheServer
+import kotlin.properties.Delegates
 
 /**
  * Created by nekocode on 3/15/16.
@@ -16,8 +18,14 @@ class MusicService: Service() {
     inner class MusicServiceBinder: Binder() {
         val service = this@MusicService
     }
-    override fun onBind(intent: Intent?): IBinder = MusicServiceBinder()
+    override fun onBind(intent: Intent?): IBinder {
+        mediaProxy = HttpProxyCacheServer.Builder(applicationContext)
+                .maxCacheSize(512 * 1024 * 1024)
+                .build()
+        return MusicServiceBinder()
+    }
 
+    var mediaProxy by Delegates.notNull<HttpProxyCacheServer>()
     val playingSong = SongPlayer(null, MediaPlayer())
     var stopSong = false
     val playingMurmurs = hashMapOf<Murmur, MediaPlayer>()
@@ -63,17 +71,16 @@ class MusicService: Service() {
 
         stopMurmurs = false
         murmurs.forEach {
-            if(it !in playingMurmurs) {
-                val player = MediaPlayer()
-                playingMurmurs[it] = player
+            val player = playingMurmurs[it] ?: MediaPlayer()
+            playingMurmurs[it] = player
 
-                player.isLooping = true
-                player.setDataSource(it.file.url)
-                player.prepareAsync()
-                player.setOnPreparedListener {
-                    if(!stopMurmurs)
-                        it.start()
-                }
+            player.reset()
+            player.isLooping = true
+            player.setDataSource(mediaProxy.getProxyUrl(it.file.url))
+            player.prepareAsync()
+            player.setOnPreparedListener {
+                if(!stopMurmurs)
+                    it.start()
             }
         }
     }

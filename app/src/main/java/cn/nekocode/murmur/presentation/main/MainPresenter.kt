@@ -52,7 +52,7 @@ class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
 
             val selectedMurmurs = SettingModel.loadSelectedMurmurs()
             if(selectedMurmurs == null) {
-                playingMurmurs.addAll(it.first.randomPick(2))
+                playingMurmurs.addAll(murmurs.randomPick(2))
                 SettingModel.saveSelectedMurmurs(playingMurmurs)
             } else {
                 playingMurmurs.addAll(selectedMurmurs)
@@ -97,7 +97,7 @@ class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
     fun timedText(): String {
         var text = "loading"
         App.musicSerivice?.apply {
-            if(playingSong.song == null)
+            if(playingSong.song == null || !playingSong.player.isPlaying)
                 return@apply
 
             val rest = (playingSong.player.duration - playingSong.player.currentPosition) / 1000
