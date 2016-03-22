@@ -19,13 +19,9 @@ class MusicService: Service() {
         val service = this@MusicService
     }
     override fun onBind(intent: Intent?): IBinder {
-        mediaProxy = HttpProxyCacheServer.Builder(applicationContext)
-                .maxCacheSize(512 * 1024 * 1024)
-                .build()
         return MusicServiceBinder()
     }
 
-    var mediaProxy by Delegates.notNull<HttpProxyCacheServer>()
     val playingSong = SongPlayer(null, MediaPlayer())
     var stopSong = false
     val playingMurmurs = hashMapOf<Murmur, MediaPlayer>()
@@ -39,15 +35,18 @@ class MusicService: Service() {
 
             val player = playingSong.player
             player.reset()
+            player.isLooping = true
             player.setDataSource(song.url)
             player.prepareAsync()
             player.setOnPreparedListener {
-                if(!stopSong)
+                if(!stopSong) {
                     it.start()
+                    RxBus.send("Prepared")
+                }
             }
 
             player.setOnCompletionListener {
-                RxBus.send("Play finished")
+                RxBus.send("Finished")
             }
 
         } else {
@@ -76,7 +75,7 @@ class MusicService: Service() {
 
             player.reset()
             player.isLooping = true
-            player.setDataSource(mediaProxy.getProxyUrl(it.file.url))
+            player.setDataSource(it.file.url)
             player.prepareAsync()
             player.setOnPreparedListener {
                 if(!stopMurmurs)

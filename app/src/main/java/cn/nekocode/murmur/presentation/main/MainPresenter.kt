@@ -1,6 +1,7 @@
 package cn.nekocode.murmur.presentation.main
 
 import android.os.Bundle
+import cn.nekocode.kotgo.component.rx.bus
 import cn.nekocode.murmur.App
 import cn.nekocode.murmur.common.MyPresenter
 import cn.nekocode.murmur.data.dto.DoubanSong
@@ -11,6 +12,8 @@ import cn.nekocode.murmur.data.model.DoubanModel
 import cn.nekocode.murmur.data.model.MurmurModel
 import cn.nekocode.murmur.data.model.SettingModel
 import cn.nekocode.murmur.util.Util.randomPick
+import org.jetbrains.anko.async
+import org.jetbrains.anko.uiThread
 import rx.Observable
 import java.util.*
 import kotlin.properties.Delegates
@@ -23,7 +26,7 @@ class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
         fun loginFailed()
         fun murmursChanged(all: List<Murmur>, playing: List<Murmur>)
         fun songChanged(song: DoubanSong)
-        fun changeTimedText(text: String)
+        fun timeChanged(timedText: String)
 
         fun showToast(msg: String)
     }
@@ -31,6 +34,7 @@ class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
     var user: DoubanUser by Delegates.notNull<DoubanUser>()
     val murmurs = ArrayList<Murmur>()
     val playingMurmurs = ArrayList<Murmur>()
+    var isDestoried = false
 
     override fun onCreate(savedState: Bundle?) {
         val cachedUser = DoubanModel.getCachedUserInfo()
@@ -40,6 +44,31 @@ class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
         } else {
             login(cachedUser.first, cachedUser.second)
         }
+
+        async() {
+            while(!isDestoried) {
+                uiThread {
+                    val time = getTimedText()
+                    if(time != null)
+                        view.timeChanged(time)
+                }
+
+                Thread.sleep(500)
+            }
+        }
+
+        bus {
+            subscribe(String::class.java) {
+                if(it.equals("Finished")) {
+
+                }
+            }
+        }
+    }
+
+    override fun onDestory() {
+        isDestoried = true
+        super.onDestory()
     }
 
     fun login(email: String, pwd: String) {
@@ -111,8 +140,8 @@ class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
         }, errorHandler)
     }
 
-    fun timedText(): String {
-        var text = "loading"
+    private fun getTimedText(): String? {
+        var text: String? = null
         App.musicSerivice?.apply {
             if(playingSong.song == null || !playingSong.player.isPlaying)
                 return@apply

@@ -21,6 +21,7 @@ import android.view.animation.LinearInterpolator
 import android.widget.*
 import butterknife.bindView
 import cn.nekocode.kotgo.component.presentation.BaseFragment
+import cn.nekocode.kotgo.component.rx.bus
 import cn.nekocode.murmur.R
 import cn.nekocode.murmur.data.dto.DoubanSong
 import cn.nekocode.murmur.data.dto.Murmur
@@ -33,12 +34,12 @@ import com.squareup.picasso.Target
 import org.jetbrains.anko.*
 import kotlin.properties.Delegates
 
-class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchListener {
+class MainFragment : BaseFragment(), MainPresenter.ViewInterface, View.OnTouchListener {
     override val layoutId: Int = R.layout.fragment_main
     val presenter = MainPresenter(this)
 
     val surfaceView: GLSurfaceView by bindView(R.id.surfaceView)
-    var renderer: ShaderRenderer by Delegates.notNull<ShaderRenderer>()
+    var renderer: ShaderRenderer by Delegates.notNull()
 
     val backgroundView: View by bindView(R.id.relativeLayout)
     val coverImageView: ImageSwitcher by bindView(R.id.coverImageView)
@@ -48,64 +49,47 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
     val murmursTextView: TextView by bindView(R.id.murmursTextView)
     val timeTextView: TextView by bindView(R.id.timeTextView)
 
-    var loginProgressDialog by Delegates.notNull<ProgressDialog>()
+    val ANIMATION_DURATION = 800L
+    var oldBackgroundColor = 0
+    var oldTextColor = 0
+    var backgroundColorAnimator: ValueAnimator? = null
+    var textColorAnimator: ValueAnimator? = null
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setupGLSufaceview()
-        setupCoverView()
-
-        oldBackgroundColor = resources.getColor(R.color.color_primary)
-        oldTextColor = Color.WHITE
-
-        loginProgressDialog = ProgressDialog(activity).apply {
+    // 初始化登陆进度框
+    val loginProgressDialog by lazy {
+        ProgressDialog(activity).apply {
             setMessage("Loging...")
             setCancelable(false)
         }
+    }
 
-        async() {
-            while(!detached) {
-                fragmentUiThread {
-                    timeTextView.text = presenter.timedText()
-                }
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-                Thread.sleep(1000)
+        // 初始化渲染器
+        surfaceView.apply {
+            setEGLContextClientVersion(2)
+            setOnTouchListener(this@MainFragment)
+
+            val shader = resources.openRawResource(R.raw.shader).reader().readText()
+            renderer = ShaderRenderer(activity, shader).apply {
+                setBackColor(resources.getColor(R.color.color_primary_dark))
+                setSpeed(0.6f)
+
+                surfaceView.setRenderer(this)
             }
         }
 
-        presenter.onCreate(savedInstanceState)
-    }
-
-    var detached = false
-    override fun onDetach() {
-        super.onDetach()
-        detached = true
-    }
-
-    fun setupGLSufaceview() {
-        surfaceView.setEGLContextClientVersion(2)
-        surfaceView.setOnTouchListener(this)
-
-        val shader = resources.openRawResource(R.raw.shader).reader().readText()
-
-        renderer = ShaderRenderer(activity, shader).apply {
-            setBackColor(resources.getColor(R.color.color_primary_dark))
-            setSpeed(0.6f)
-
-            surfaceView.setRenderer(this)
-        }
-    }
-
-    fun setupCoverView() {
-        coverImageView.setFactory {
-            ImageView(activity).apply {
-                scaleType = ImageView.ScaleType.FIT_XY
-                layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT)
-            }
-        }
-
+        // 初始化封面图控件
         coverImageView.apply {
+            setFactory {
+                ImageView(activity).apply {
+                    scaleType = ImageView.ScaleType.FIT_XY
+                    layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT)
+                }
+            }
+
             inAnimation = AnimationUtils.loadAnimation(activity, android.R.anim.fade_in)
             inAnimation.duration = ANIMATION_DURATION
 
@@ -114,70 +98,27 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
 
             setImageResource(R.drawable.transparent)
         }
-    }
 
-    val loginDialog by lazy {
-        var emailEdit: EditText? = null
-        var pwdEdit: EditText? = null
+        // 设计背景和文字动画开始颜色
+        oldBackgroundColor = backgroundView.backgroundColor
+        oldTextColor = Color.WHITE
 
-        val dialog = alert("Login Your Douban Account") {
-            cancellable(false)
-
-            customView {
-                verticalLayout() {
-                    padding = dip(30)
-
-                    emailEdit = editText {
-                        hint = "Email"
-                        textSize = 14f
-                    }
-
-                    pwdEdit = editText {
-                        hint = "Password"
-                        textSize = 14f
-                    }
-                }
-            }
-
-            positiveButton("Login") {}
-
-            onKey {
-                keyCode, keyEvent ->
-                if(keyCode == KeyEvent.KEYCODE_BACK && keyEvent.action == KeyEvent.ACTION_DOWN) {
-                    alert("Are you want to exit?") {
-                        negativeButton("No") {
-                        }
-
-                        positiveButton("Yes") {
-                            activity.finish()
-                        }
-                    }.show()
-                }
-                false
-            }
-        }.builder.create()
-
-        dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val email = emailEdit?.text.toString()
-                val pwd = pwdEdit?.text.toString()
-
-                if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                    toast("Email address is invaild.")
-
-                } else if (TextUtils.isEmpty(pwd)) {
-                    toast("Password is invaild.")
-
-                } else {
-                    presenter.login(email, pwd)
-                    loginProgressDialog.show()
-
-                    dialog.dismiss()
+        // 订阅事件总线
+        bus {
+            subscribe(String::class.java) {
+                if (it.equals("Prepared")) {
+                    isPaletteChanging = false
+                    progressWheel.visibility = View.INVISIBLE
                 }
             }
         }
 
-        dialog
+        presenter.onCreate(savedInstanceState)
+    }
+
+    override fun onDetach() {
+        presenter.onDestory()
+        super.onDetach()
     }
 
     override fun showLoginDialog() {
@@ -198,7 +139,7 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
     }
 
     override fun murmursChanged(all: List<Murmur>, playing: List<Murmur>) {
-        murmursTextView.text = when(playing.size) {
+        murmursTextView.text = when (playing.size) {
             0 -> "❤"
             1 -> "❤(${playing[0].name})"
             2 -> "❤(${playing[0].name}, ${playing[1].name})"
@@ -211,7 +152,7 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
             items[i] = murmur.name
 
             playing.forEach {
-                if(it.id.equals(murmur.id)) {
+                if (it.id.equals(murmur.id)) {
                     booleans[i] = true
                 }
             }
@@ -229,7 +170,7 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
         }
     }
 
-    val target = object: Target {
+    val target = object : Target {
         override fun onPrepareLoad(drawable: Drawable?) {
         }
 
@@ -261,15 +202,9 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
         renderer.setSpeed(1.0f)
     }
 
-    override fun changeTimedText(text: String) {
-        timeTextView.text = text
+    override fun timeChanged(timedText: String) {
+        timeTextView.text = timedText
     }
-
-    val ANIMATION_DURATION = 800L
-    var oldBackgroundColor = 0
-    var oldTextColor = 0
-    var backgroundColorAnimator: ValueAnimator? = null
-    var textColorAnimator: ValueAnimator? = null
 
     fun switchPalette(bitmap: Bitmap) {
         Palette.from(bitmap).generate {
@@ -278,7 +213,7 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
 
             fun createColorAnimator(sourceColor: Int,
                                     targetColor: Int,
-                                    updateListener: (it: ValueAnimator)->Unit): ValueAnimator
+                                    updateListener: (it: ValueAnimator) -> Unit): ValueAnimator
                     = ValueAnimator.ofObject(ArgbEvaluator(), sourceColor, targetColor).apply {
                 duration = ANIMATION_DURATION + 100
                 interpolator = LinearInterpolator()
@@ -319,7 +254,7 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
 
     var isPaletteChanging = false
     fun listenAnimation(animator: Animator) {
-        animator.addListener(object: Animator.AnimatorListener {
+        animator.addListener(object : Animator.AnimatorListener {
             override fun onAnimationRepeat(animation: Animator?) {
             }
 
@@ -340,7 +275,7 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
     override fun onTouch(view: View?, event: MotionEvent?) = gestureDetector.onTouchEvent(event)
 
     val gestureDetector by lazy {
-        GestureDetector(activity, object: GestureDetector.OnGestureListener {
+        GestureDetector(activity, object : GestureDetector.OnGestureListener {
             val FLING_MIN_DISTANCE = dip(100)
             val FLING_MIN_DISTANCE_Y = dip(50)
             val FLING_MIN_VELOCITY = 1
@@ -394,5 +329,68 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
             }
 
         })
+    }
+
+    val loginDialog by lazy {
+        var emailEdit: EditText? = null
+        var pwdEdit: EditText? = null
+
+        val dialog = alert("Login Your Douban Account") {
+            cancellable(false)
+
+            customView {
+                verticalLayout() {
+                    padding = dip(30)
+
+                    emailEdit = editText {
+                        hint = "Email"
+                        textSize = 14f
+                    }
+
+                    pwdEdit = editText {
+                        hint = "Password"
+                        textSize = 14f
+                    }
+                }
+            }
+
+            positiveButton("Login") {}
+
+            onKey { keyCode, keyEvent ->
+                if (keyCode == KeyEvent.KEYCODE_BACK && keyEvent.action == KeyEvent.ACTION_DOWN) {
+                    alert("Are you want to exit?") {
+                        negativeButton("No") {
+                        }
+
+                        positiveButton("Yes") {
+                            activity.finish()
+                        }
+                    }.show()
+                }
+                false
+            }
+        }.builder.create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val email = emailEdit?.text.toString()
+                val pwd = pwdEdit?.text.toString()
+
+                if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    toast("Email address is invaild.")
+
+                } else if (TextUtils.isEmpty(pwd)) {
+                    toast("Password is invaild.")
+
+                } else {
+                    presenter.login(email, pwd)
+                    loginProgressDialog.show()
+
+                    dialog.dismiss()
+                }
+            }
+        }
+
+        dialog
     }
 }

@@ -24,6 +24,7 @@ object DataLayer {
     const val HTTP_WRITE_TIMEOUT = 10L
 
     var app: Application by Delegates.notNull()
+    var mediaProxy by Delegates.notNull<HttpProxyCacheServer>()
     var okHttpClient: OkHttpClient by Delegates.notNull()
     val gson: Gson = GsonBuilder().setDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'").create()
 
@@ -34,6 +35,10 @@ object DataLayer {
                 .setEncryptionMethod(HawkBuilder.EncryptionMethod.MEDIUM)
                 .setStorage(HawkBuilder.newSqliteStorage(app))
                 .setLogLevel(LogLevel.FULL)
+                .build()
+
+        mediaProxy = HttpProxyCacheServer.Builder(app)
+                .maxCacheSize(512 * 1024 * 1024)
                 .build()
 
         val cacheDir = File(app.cacheDir, RESPONSE_CACHE_FILE)
