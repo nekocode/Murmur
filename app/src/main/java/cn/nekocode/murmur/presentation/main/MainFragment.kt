@@ -74,19 +74,6 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
         }
 
         presenter.onCreate(savedInstanceState)
-
-        // TODO: 移到 murmursChange()
-        val booleans = BooleanArray(3)
-        murmursTextView.onClick {
-            AlertDialog.Builder(activity).apply {
-                setMultiChoiceItems(
-                        arrayOf("123", "321", "111"),
-                        booleans
-                ) { dialogInterface: DialogInterface, which: Int, isChecked: Boolean ->
-
-                }
-            }.show()
-        }
     }
 
     var detached = false
@@ -210,12 +197,35 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
         toast(msg)
     }
 
-    override fun murmursChange(murmurs: List<Murmur>) {
-        murmursTextView.text = when(murmurs.size) {
-            0 -> "nothing"
-            1 -> "[${murmurs[0].name}]"
-            2 -> "[${murmurs[0].name}, ${murmurs[1].name}]"
-            else -> "[${murmurs[0].name}, ${murmurs[1].name}, ...]"
+    override fun murmursChanged(all: List<Murmur>, playing: List<Murmur>) {
+        murmursTextView.text = when(playing.size) {
+            0 -> "❤"
+            1 -> "❤(${playing[0].name})"
+            2 -> "❤(${playing[0].name}, ${playing[1].name})"
+            else -> "❤(${playing[0].name}, ${playing[1].name}, ...)"
+        }
+
+        val booleans = BooleanArray(all.size)
+        val items = arrayOfNulls<String>(all.size)
+        all.forEachIndexed { i, murmur ->
+            items[i] = murmur.name
+
+            playing.forEach {
+                if(it.id.equals(murmur.id)) {
+                    booleans[i] = true
+                }
+            }
+        }
+
+        murmursTextView.onClick {
+            AlertDialog.Builder(activity).apply {
+                setMultiChoiceItems(
+                        items,
+                        booleans
+                ) { dialogInterface: DialogInterface, which: Int, isChecked: Boolean ->
+                    presenter.changeMurmur(all[which], isChecked)
+                }
+            }.show()
         }
     }
 
@@ -235,7 +245,7 @@ class MainFragment: BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLis
         }
     }
 
-    override fun songChange(song: DoubanSong) {
+    override fun songChanged(song: DoubanSong) {
         isPaletteChanging = true
 
         song.apply {

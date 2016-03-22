@@ -21,8 +21,8 @@ class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
         fun showLoginDialog()
         fun loginSuccess()
         fun loginFailed()
-        fun murmursChange(murmurs: List<Murmur>)
-        fun songChange(song: DoubanSong)
+        fun murmursChanged(all: List<Murmur>, playing: List<Murmur>)
+        fun songChanged(song: DoubanSong)
         fun changeTimedText(text: String)
 
         fun showToast(msg: String)
@@ -40,32 +40,6 @@ class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
         } else {
             login(cachedUser.first, cachedUser.second)
         }
-    }
-
-    private fun fetchData() {
-        Observable.combineLatest(MurmurModel.getMurmurs(), DoubanModel.nextSong(user), {
-            murmurs, song ->
-            Pair(murmurs, song)
-
-        }).bind().subscribe({
-            murmurs.addAll(it.first)
-
-            val selectedMurmurs = SettingModel.loadSelectedMurmurs()
-            if(selectedMurmurs == null) {
-                playingMurmurs.addAll(murmurs.randomPick(2))
-                SettingModel.saveSelectedMurmurs(playingMurmurs)
-            } else {
-                playingMurmurs.addAll(selectedMurmurs)
-            }
-
-            App.musicSerivice?.playMurmurs(playingMurmurs)
-            view.murmursChange(playingMurmurs)
-
-            val song = it.second
-            App.musicSerivice?.playSong(song)
-            view.songChange(song)
-
-        }, errorHandler)
     }
 
     fun login(email: String, pwd: String) {
@@ -87,10 +61,53 @@ class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
         })
     }
 
+    private fun fetchData() {
+        Observable.combineLatest(MurmurModel.getMurmurs(), DoubanModel.nextSong(user), {
+            murmurs, song ->
+            Pair(murmurs, song)
+
+        }).bind().subscribe({
+            murmurs.addAll(it.first)
+
+            val selectedMurmurs = SettingModel.loadSelectedMurmurs()
+            if(selectedMurmurs == null) {
+                playingMurmurs.addAll(murmurs.randomPick(2))
+                SettingModel.saveSelectedMurmurs(playingMurmurs)
+            } else {
+                playingMurmurs.addAll(selectedMurmurs)
+            }
+
+            App.musicSerivice?.playMurmurs(playingMurmurs)
+            view.murmursChanged(murmurs, playingMurmurs)
+
+            val song = it.second
+            App.musicSerivice?.playSong(song)
+            view.songChanged(song)
+
+        }, errorHandler)
+    }
+
+    fun changeMurmur(murmur: Murmur, play: Boolean) {
+        if(murmur in playingMurmurs) {
+            if(!play) {
+                playingMurmurs.remove(murmur)
+            }
+        } else {
+            if(play) {
+                playingMurmurs.add(murmur)
+            }
+        }
+
+        SettingModel.saveSelectedMurmurs(playingMurmurs)
+
+        App.musicSerivice?.playMurmurs(playingMurmurs)
+        view.murmursChanged(murmurs, playingMurmurs)
+    }
+
     fun nextSong() {
         DoubanModel.nextSong(user).bind().subscribe({
             App.musicSerivice?.playSong(it)
-            view.songChange(it)
+            view.songChanged(it)
         }, errorHandler)
     }
 
