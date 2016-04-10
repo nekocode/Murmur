@@ -1,4 +1,4 @@
-package cn.nekocode.murmur.view;
+package cn.nekocode.murmur.widget;
 
 import android.content.Context;
 import android.opengl.GLES20;

@@ -1,4 +1,4 @@
-package cn.nekocode.murmur.presentation.main
+package cn.nekocode.murmur.ui.main
 
 import android.animation.Animator
 import android.animation.ArgbEvaluator
@@ -20,23 +20,25 @@ import android.view.animation.AnimationUtils
 import android.view.animation.LinearInterpolator
 import android.widget.*
 import butterknife.bindView
-import cn.nekocode.kotgo.component.presentation.BaseFragment
 import cn.nekocode.kotgo.component.rx.bus
+import cn.nekocode.kotgo.component.ui.BaseFragment
 import cn.nekocode.murmur.R
 import cn.nekocode.murmur.data.dto.DoubanSong
 import cn.nekocode.murmur.data.dto.Murmur
 import cn.nekocode.murmur.util.CircleTransform
 import cn.nekocode.murmur.util.ImageUtil
-import cn.nekocode.murmur.view.ShaderRenderer
+import cn.nekocode.murmur.widget.ShaderRenderer
 import com.pnikosis.materialishprogress.ProgressWheel
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import org.jetbrains.anko.*
 import kotlin.properties.Delegates
 
-class MainFragment : BaseFragment(), MainPresenter.ViewInterface, View.OnTouchListener {
+class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
     override val layoutId: Int = R.layout.fragment_main
-    val presenter = MainPresenter(this)
+    val presenter: Contract.Presenter by lazy {
+        bindPresenter<MainPresenter>()
+    }
 
     val surfaceView: GLSurfaceView by bindView(R.id.surfaceView)
     var renderer: ShaderRenderer by Delegates.notNull()
@@ -112,13 +114,6 @@ class MainFragment : BaseFragment(), MainPresenter.ViewInterface, View.OnTouchLi
                 }
             }
         }
-
-        presenter.onCreate(savedInstanceState)
-    }
-
-    override fun onDetach() {
-        presenter.onDestory()
-        super.onDetach()
     }
 
     override fun showLoginDialog() {

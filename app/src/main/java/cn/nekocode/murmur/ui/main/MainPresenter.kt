@@ -1,10 +1,9 @@
-package cn.nekocode.murmur.presentation.main
+package cn.nekocode.murmur.ui.main
 
 import android.os.Bundle
 import cn.nekocode.kotgo.component.rx.bus
 import cn.nekocode.murmur.App
 import cn.nekocode.murmur.common.MyPresenter
-import cn.nekocode.murmur.data.dto.DoubanSong
 import cn.nekocode.murmur.data.dto.DoubanUser
 import cn.nekocode.murmur.data.dto.Murmur
 import cn.nekocode.murmur.data.exception.DoubanException
@@ -19,17 +18,8 @@ import java.util.*
 import kotlin.properties.Delegates
 
 
-class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
-    interface ViewInterface: BaseViewInterface {
-        fun showLoginDialog()
-        fun loginSuccess()
-        fun loginFailed()
-        fun murmursChanged(all: List<Murmur>, playing: List<Murmur>)
-        fun songChanged(song: DoubanSong)
-        fun timeChanged(timedText: String)
-
-        fun showToast(msg: String)
-    }
+class MainPresenter(): MyPresenter(), Contract.Presenter {
+    var view: Contract.View? = null
 
     var user: DoubanUser by Delegates.notNull<DoubanUser>()
     val murmurs = ArrayList<Murmur>()
@@ -40,7 +30,7 @@ class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
         val cachedUser = DoubanModel.getCachedUserInfo()
 
         if(cachedUser == null) {
-            view.showLoginDialog()
+            view?.showLoginDialog()
         } else {
             login(cachedUser.first, cachedUser.second)
         }
@@ -50,7 +40,7 @@ class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
                 uiThread {
                     val time = getTimedText()
                     if(time != null)
-                        view.timeChanged(time)
+                        view?.timeChanged(time)
                 }
 
                 Thread.sleep(500)
@@ -66,27 +56,27 @@ class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
         }
     }
 
-    override fun onDestory() {
+    override fun onDestroyView() {
         isDestoried = true
-        super.onDestory()
+        super.onDestroyView()
     }
 
-    fun login(email: String, pwd: String) {
+    override fun login(email: String, pwd: String) {
         DoubanModel.login(email, pwd).bind().subscribe({
             user = it
-            view.loginSuccess()
+            view?.loginSuccess()
             fetchData()
 
         }, {
             when(it) {
-                is DoubanException -> view.showToast(it.err)
+                is DoubanException -> view?.showToast(it.err)
                 else -> {
                     if(it.message != null)
-                        view.showToast(it.message!!)
+                        view?.showToast(it.message!!)
                 }
             }
 
-            view.loginFailed()
+            view?.loginFailed()
         })
     }
 
@@ -107,16 +97,16 @@ class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
             }
 
             App.musicSerivice?.playMurmurs(playingMurmurs)
-            view.murmursChanged(murmurs, playingMurmurs)
+            view?.murmursChanged(murmurs, playingMurmurs)
 
             val song = it.second
             App.musicSerivice?.playSong(song)
-            view.songChanged(song)
+            view?.songChanged(song)
 
         }, errorHandler)
     }
 
-    fun changeMurmur(murmur: Murmur, play: Boolean) {
+    override fun changeMurmur(murmur: Murmur, play: Boolean) {
         if(murmur in playingMurmurs) {
             if(!play) {
                 playingMurmurs.remove(murmur)
@@ -130,13 +120,13 @@ class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
         SettingModel.saveSelectedMurmurs(playingMurmurs)
 
         App.musicSerivice?.playMurmurs(playingMurmurs)
-        view.murmursChanged(murmurs, playingMurmurs)
+        view?.murmursChanged(murmurs, playingMurmurs)
     }
 
-    fun nextSong() {
+    override fun nextSong() {
         DoubanModel.nextSong(user).bind().subscribe({
             App.musicSerivice?.playSong(it)
-            view.songChanged(it)
+            view?.songChanged(it)
         }, errorHandler)
     }
 
@@ -162,17 +152,17 @@ class MainPresenter(override val view: ViewInterface): MyPresenter(view) {
         when(it) {
             is DoubanException -> {
                 if (it.err.equals("invalid_token")) {
-                    view.showToast("You token has been invalid.\nYou must login again.")
-                    view.showLoginDialog()
+                    view?.showToast("You token has been invalid.\nYou must login again.")
+                    view?.showLoginDialog()
 
                 } else {
-                    view.showToast(it.err)
+                    view?.showToast(it.err)
                 }
             }
 
             else -> {
                 if(it.message != null)
-                    view.showToast(it.message!!)
+                    view?.showToast(it.message!!)
             }
         }
 

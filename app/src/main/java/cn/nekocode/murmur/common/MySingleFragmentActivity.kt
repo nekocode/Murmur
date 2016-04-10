@@ -1,8 +1,8 @@
 package cn.nekocode.murmur.common
 
 import android.content.Context
-import cn.nekocode.kotgo.component.presentation.BaseFragment
-import cn.nekocode.kotgo.component.presentation.SingleFragmentActivity
+import cn.nekocode.kotgo.component.ui.BaseFragment
+import cn.nekocode.kotgo.component.ui.SingleFragmentActivity
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
 
 /**
