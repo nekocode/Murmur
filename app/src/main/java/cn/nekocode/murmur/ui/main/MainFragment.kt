@@ -65,6 +65,13 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // 绑定 Presenter
+        presenter
+    }
+
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -102,7 +109,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         }
 
         // 设计背景和文字动画开始颜色
-        oldBackgroundColor = backgroundView.backgroundColor
+        oldBackgroundColor = resources.getColor(R.color.color_primary)
         oldTextColor = Color.WHITE
 
         // 订阅事件总线

@@ -16,8 +16,7 @@ class MainActivity: MySingleFragmentActivity<MainFragment>() {
     }
 
     override fun onDestroy() {
-        App.musicSerivice?.pauseSong()
-        App.musicSerivice?.stopAllMurmurs()
+
         super.onDestroy()
     }
 }

@@ -8,13 +8,15 @@ import android.os.IBinder
 import cn.nekocode.kotgo.component.rx.RxBus
 import cn.nekocode.murmur.data.dto.DoubanSong
 import cn.nekocode.murmur.data.dto.Murmur
-import com.danikula.videocache.HttpProxyCacheServer
-import kotlin.properties.Delegates
 
 /**
  * Created by nekocode on 3/15/16.
  */
 class MusicService: Service() {
+    companion object {
+        var instance: MusicService? = null
+    }
+
     inner class MusicServiceBinder: Binder() {
         val service = this@MusicService
     }

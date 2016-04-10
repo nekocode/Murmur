@@ -1,5 +1,6 @@
 package cn.nekocode.murmur.ui.main
 
+import android.app.Activity
 import android.os.Bundle
 import cn.nekocode.kotgo.component.rx.bus
 import cn.nekocode.murmur.App
@@ -10,6 +11,7 @@ import cn.nekocode.murmur.data.exception.DoubanException
 import cn.nekocode.murmur.data.model.DoubanModel
 import cn.nekocode.murmur.data.model.MurmurModel
 import cn.nekocode.murmur.data.model.SettingModel
+import cn.nekocode.murmur.service.MusicService
 import cn.nekocode.murmur.util.Util.randomPick
 import org.jetbrains.anko.async
 import org.jetbrains.anko.uiThread
@@ -24,19 +26,26 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
     var user: DoubanUser by Delegates.notNull<DoubanUser>()
     val murmurs = ArrayList<Murmur>()
     val playingMurmurs = ArrayList<Murmur>()
-    var isDestoried = false
 
-    override fun onCreate(savedState: Bundle?) {
+    override fun onAttach(activity: Activity?) {
+        super.onAttach(activity)
+        view = getParent() as Contract.View
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // 检查是否有登陆纪录
         val cachedUser = DoubanModel.getCachedUserInfo()
-
         if(cachedUser == null) {
             view?.showLoginDialog()
         } else {
             login(cachedUser.first, cachedUser.second)
         }
 
+        // 异步获取歌曲剩余时间
         async() {
-            while(!isDestoried) {
+            while(view != null) {
                 uiThread {
                     val time = getTimedText()
                     if(time != null)
@@ -46,6 +55,7 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
                 Thread.sleep(500)
             }
         }
+
 
         bus {
             subscribe(String::class.java) {
@@ -57,8 +67,11 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
     }
 
     override fun onDestroyView() {
-        isDestoried = true
+        view = null
         super.onDestroyView()
+
+        MusicService.instance?.pauseSong()
+        MusicService.instance?.stopAllMurmurs()
     }
 
     override fun login(email: String, pwd: String) {
@@ -96,11 +109,11 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
                 playingMurmurs.addAll(selectedMurmurs)
             }
 
-            App.musicSerivice?.playMurmurs(playingMurmurs)
+            MusicService.instance?.playMurmurs(playingMurmurs)
             view?.murmursChanged(murmurs, playingMurmurs)
 
             val song = it.second
-            App.musicSerivice?.playSong(song)
+            MusicService.instance?.playSong(song)
             view?.songChanged(song)
 
         }, errorHandler)
@@ -119,20 +132,20 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
 
         SettingModel.saveSelectedMurmurs(playingMurmurs)
 
-        App.musicSerivice?.playMurmurs(playingMurmurs)
+        MusicService.instance?.playMurmurs(playingMurmurs)
         view?.murmursChanged(murmurs, playingMurmurs)
     }
 
     override fun nextSong() {
         DoubanModel.nextSong(user).bind().subscribe({
-            App.musicSerivice?.playSong(it)
+            MusicService.instance?.playSong(it)
             view?.songChanged(it)
         }, errorHandler)
     }
 
     private fun getTimedText(): String? {
         var text: String? = null
-        App.musicSerivice?.apply {
+        MusicService.instance?.apply {
             if(playingSong.song == null || !playingSong.player.isPlaying)
                 return@apply
 

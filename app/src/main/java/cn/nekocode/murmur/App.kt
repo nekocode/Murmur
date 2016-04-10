@@ -15,16 +15,15 @@ import kotlin.properties.Delegates
 class App: Application() {
     companion object {
         var instance by Delegates.notNull<App>()
-        var musicSerivice: MusicService? = null
     }
 
     val connection = object: ServiceConnection {
         override fun onServiceDisconnected(p0: ComponentName?) {
-            musicSerivice = null
+            MusicService.instance = null
         }
 
         override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
-            musicSerivice = (p1 as MusicService.MusicServiceBinder).service
+            MusicService.instance = (p1 as MusicService.MusicServiceBinder).service
         }
     }
 
