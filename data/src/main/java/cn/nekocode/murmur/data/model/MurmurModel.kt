@@ -13,6 +13,7 @@ import rx.schedulers.Schedulers
  */
 object MurmurModel {
 
+    // TODO: 16/4/12 这里需要修复
     fun getMurmurs(): Observable<List<Murmur>> =
             LeancloudService.api.getMurmurs(50, "-updatedAt")
                     .subscribeOn(Schedulers.io())

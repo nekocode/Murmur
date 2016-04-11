@@ -10,13 +10,9 @@ class MainActivity: MySingleFragmentActivity<MainFragment>() {
             negativeButton("No") {  }
 
             positiveButton("Yes") {
+                fragment?.finish()
                 super.onBackPressed()
             }
         }.show()
-    }
-
-    override fun onDestroy() {
-
-        super.onDestroy()
     }
 }

@@ -2,9 +2,12 @@ package cn.nekocode.murmur.ui.main
 
 import android.app.Activity
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import cn.nekocode.kotgo.component.rx.bus
-import cn.nekocode.murmur.App
 import cn.nekocode.murmur.common.MyPresenter
+import cn.nekocode.murmur.data.dto.DoubanSong
 import cn.nekocode.murmur.data.dto.DoubanUser
 import cn.nekocode.murmur.data.dto.Murmur
 import cn.nekocode.murmur.data.exception.DoubanException
@@ -17,15 +20,15 @@ import org.jetbrains.anko.async
 import org.jetbrains.anko.uiThread
 import rx.Observable
 import java.util.*
-import kotlin.properties.Delegates
 
 
 class MainPresenter(): MyPresenter(), Contract.Presenter {
     var view: Contract.View? = null
 
-    var user: DoubanUser by Delegates.notNull<DoubanUser>()
+    var user: DoubanUser? = null
     val murmurs = ArrayList<Murmur>()
     val playingMurmurs = ArrayList<Murmur>()
+    var playingSong: DoubanSong? = null
 
     override fun onAttach(activity: Activity?) {
         super.onAttach(activity)
@@ -35,12 +38,32 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 检查是否有登陆纪录
-        val cachedUser = DoubanModel.getCachedUserInfo()
-        if(cachedUser == null) {
-            view?.showLoginDialog()
+        if(savedInstanceState != null) {
+            // 恢复现场
+            user = savedInstanceState.getParcelable("user")
+            murmurs.addAll(savedInstanceState.getParcelableArrayList("murmurs"))
+            playingMurmurs.addAll(savedInstanceState.getParcelableArrayList("playingMurmurs"))
+            playingSong = savedInstanceState.getParcelable("playingSong")
+
         } else {
-            login(cachedUser.first, cachedUser.second)
+            // 检查是否已经登录
+            val cachedUser = DoubanModel.getCachedUserInfo()
+            if(cachedUser == null) {
+                view?.showLoginDialog()
+            } else {
+                login(cachedUser.first, cachedUser.second)
+            }
+
+        }
+
+        // 订阅播放结束事件
+        // TODO: 16/4/11 控制播放循环
+        bus {
+            subscribe(String::class.java) {
+                if(it.equals("Finished")) {
+
+                }
+            }
         }
 
         // 异步获取歌曲剩余时间
@@ -49,35 +72,54 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
                 uiThread {
                     val time = getTimedText()
                     if(time != null)
-                        view?.timeChanged(time)
+                        view?.onTimeChanged(time)
                 }
 
                 Thread.sleep(500)
             }
         }
+    }
 
+    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        if(savedInstanceState != null) {
+            // 恢复现场
+            this.view?.onMurmursChanged(murmurs, playingMurmurs)
+            this.view?.onSongChanged(playingSong!!)
 
-        bus {
-            subscribe(String::class.java) {
-                if(it.equals("Finished")) {
-
-                }
-            }
         }
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
+
+    /**
+     * 保存现场
+     */
+    override fun onSaveInstanceState(outState: Bundle?) {
+        outState?.putParcelable("user", user)
+        outState?.putParcelableArrayList("murmurs", murmurs)
+        outState?.putParcelableArrayList("playingMurmurs", playingMurmurs)
+        outState?.putParcelable("playingSong", playingSong)
+
+        super.onSaveInstanceState(outState)
     }
 
     override fun onDestroyView() {
         view = null
         super.onDestroyView()
+    }
 
+    override fun stopAll() {
+        // 暂停歌曲和所有白噪音
         MusicService.instance?.pauseSong()
         MusicService.instance?.stopAllMurmurs()
     }
 
+    /**
+     * 登陆豆瓣
+     */
     override fun login(email: String, pwd: String) {
         DoubanModel.login(email, pwd).bind().subscribe({
             user = it
-            view?.loginSuccess()
+            view?.onLoginSuccess()
             fetchData()
 
         }, {
@@ -89,12 +131,15 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
                 }
             }
 
-            view?.loginFailed()
+            view?.onLoginFailed()
         })
     }
 
+    /**
+     * 获取歌曲和白噪音
+     */
     private fun fetchData() {
-        Observable.combineLatest(MurmurModel.getMurmurs(), DoubanModel.nextSong(user), {
+        Observable.combineLatest(MurmurModel.getMurmurs(), DoubanModel.nextSong(user!!), {
             murmurs, song ->
             Pair(murmurs, song)
 
@@ -110,15 +155,18 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
             }
 
             MusicService.instance?.playMurmurs(playingMurmurs)
-            view?.murmursChanged(murmurs, playingMurmurs)
+            view?.onMurmursChanged(murmurs, playingMurmurs)
 
-            val song = it.second
-            MusicService.instance?.playSong(song)
-            view?.songChanged(song)
+            playingSong = it.second
+            MusicService.instance?.playSong(playingSong!!)
+            view?.onSongChanged(playingSong!!)
 
         }, errorHandler)
     }
 
+    /**
+     * 切换白噪音
+     */
     override fun changeMurmur(murmur: Murmur, play: Boolean) {
         if(murmur in playingMurmurs) {
             if(!play) {
@@ -133,16 +181,23 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
         SettingModel.saveSelectedMurmurs(playingMurmurs)
 
         MusicService.instance?.playMurmurs(playingMurmurs)
-        view?.murmursChanged(murmurs, playingMurmurs)
+        view?.onMurmursChanged(murmurs, playingMurmurs)
     }
 
+    /**
+     * 切换歌曲
+     */
     override fun nextSong() {
-        DoubanModel.nextSong(user).bind().subscribe({
-            MusicService.instance?.playSong(it)
-            view?.songChanged(it)
+        DoubanModel.nextSong(user!!).bind().subscribe({
+            playingSong = it
+            MusicService.instance?.playSong(playingSong!!)
+            view?.onSongChanged(playingSong!!)
         }, errorHandler)
     }
 
+    /**
+     * 获取当前歌曲剩余时间
+     */
     private fun getTimedText(): String? {
         var text: String? = null
         MusicService.instance?.apply {
@@ -161,6 +216,9 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
         return text
     }
 
+    /**
+     * 通用错误处理
+     */
     val errorHandler: (Throwable)->Unit = {
         when(it) {
             is DoubanException -> {

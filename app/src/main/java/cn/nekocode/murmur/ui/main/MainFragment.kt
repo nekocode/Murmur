@@ -65,15 +65,11 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         // 绑定 Presenter
         presenter
-    }
-
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
 
         // 初始化渲染器
         surfaceView.apply {
@@ -123,15 +119,19 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         }
     }
 
+    fun finish() {
+        presenter.stopAll()
+    }
+
     override fun showLoginDialog() {
         loginDialog.show()
     }
 
-    override fun loginSuccess() {
+    override fun onLoginSuccess() {
         loginProgressDialog.dismiss()
     }
 
-    override fun loginFailed() {
+    override fun onLoginFailed() {
         showLoginDialog()
         loginProgressDialog.dismiss()
     }
@@ -140,7 +140,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         toast(msg)
     }
 
-    override fun murmursChanged(all: List<Murmur>, playing: List<Murmur>) {
+    override fun onMurmursChanged(all: List<Murmur>, playing: List<Murmur>) {
         murmursTextView.text = when (playing.size) {
             0 -> "❤"
             1 -> "❤(${playing[0].name})"
@@ -188,7 +188,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         }
     }
 
-    override fun songChanged(song: DoubanSong) {
+    override fun onSongChanged(song: DoubanSong) {
         isPaletteChanging = true
 
         song.apply {
@@ -204,7 +204,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         renderer.setSpeed(1.0f)
     }
 
-    override fun timeChanged(timedText: String) {
+    override fun onTimeChanged(timedText: String) {
         timeTextView.text = timedText
     }
 

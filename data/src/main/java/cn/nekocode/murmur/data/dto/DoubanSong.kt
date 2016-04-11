@@ -1,5 +1,9 @@
 package cn.nekocode.murmur.data.dto
 
+import java.util.*
+import android.os.Parcel
+import android.os.Parcelable
+
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -18,40 +22,31 @@ data class DoubanSong(
         val title: String,
         val length: Long,
         val url: String
-)
+) : Parcelable {
+    constructor(source: Parcel): this(source.readString(), source.readString(), source.readString(), source.readString(), source.readLong(), source.readString())
 
-//{
-//    "r": 0,
-//    "version_max": 638,
-//    "is_show_quick_start": 0,
-//    "song": [
-//    {
-//        "album": "http://site.douban.com/oukaitou/",
-//        "status": 0,
-//        "picture": "https://img1.doubanio.com/view/site/large/public/cca3b49d0b6ef18.jpg",
-//        "ssid": "62ba",
-//        "artist": "α·Pav",
-//        "url": "http://mr7.doubanio.com/1dd75c253dd3e749357c69602467f8ea/0/fm/song/p1842510_128k.mp4",
-//        "title": "From Here To Somewhere",
-//        "length": 487,
-//        "like": 0,
-//        "subtype": "S",
-//        "public_time": "",
-//        "sid": "1842510",
-//        "singers": [
-//        {
-//            "related_site_id": 105149,
-//            "is_site_artist": false,
-//            "id": "56997",
-//            "name": "α·Pav"
-//        }
-//        ],
-//        "aid": "105149",
-//        "file_ext": "mp4",
-//        "sha256": "dc13b80be3027d44a832973b9a2175afa453bb1a20174464ed3b07acc971bb9d",
-//        "kbps": "128",
-//        "albumtitle": "α·Pav",
-//        "alert_msg": ""
-//    }
-//    ]
-//}
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    override fun writeToParcel(dest: Parcel?, flags: Int) {
+        dest?.writeString(id)
+        dest?.writeString(picture)
+        dest?.writeString(artist)
+        dest?.writeString(title)
+        dest?.writeLong(length)
+        dest?.writeString(url)
+    }
+
+    companion object {
+        @JvmField final val CREATOR: Parcelable.Creator<DoubanSong> = object : Parcelable.Creator<DoubanSong> {
+            override fun createFromParcel(source: Parcel): DoubanSong {
+                return DoubanSong(source)
+            }
+
+            override fun newArray(size: Int): Array<DoubanSong?> {
+                return arrayOfNulls(size)
+            }
+        }
+    }
+}

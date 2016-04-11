@@ -9,19 +9,22 @@ import cn.nekocode.murmur.data.dto.Murmur
 interface Contract {
     interface View {
         fun showLoginDialog()
-        fun loginSuccess()
-        fun loginFailed()
-        fun murmursChanged(all: List<Murmur>, playing: List<Murmur>)
-        fun songChanged(song: DoubanSong)
-        fun timeChanged(timedText: String)
+        fun onLoginSuccess()
+        fun onLoginFailed()
+
+        fun onMurmursChanged(all: List<Murmur>, playing: List<Murmur>)
+        fun onSongChanged(song: DoubanSong)
+        fun onTimeChanged(timedText: String)
 
         fun showToast(msg: String)
     }
 
     interface Presenter {
+        fun login(email: String, pwd: String)
+
         fun changeMurmur(murmur: Murmur, play: Boolean)
         fun nextSong()
-        fun login(email: String, pwd: String)
+        fun stopAll()
     }
 
 }
