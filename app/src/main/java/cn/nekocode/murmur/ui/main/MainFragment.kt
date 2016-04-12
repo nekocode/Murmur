@@ -32,6 +32,7 @@ import com.pnikosis.materialishprogress.ProgressWheel
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import org.jetbrains.anko.*
+import qiu.niorgai.StatusBarCompat
 import kotlin.properties.Delegates
 
 class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
@@ -228,9 +229,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
 
                 backgroundView.backgroundColor = color
                 renderer.setBackColor(color)
-                if (Build.VERSION.SDK_INT >= 21) {
-                    activity.window.statusBarColor = color
-                }
+                StatusBarCompat.setStatusBarColor(activity, color)
 
                 oldBackgroundColor = color
             }

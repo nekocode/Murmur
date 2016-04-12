@@ -47,6 +47,7 @@ dependencies {
     compile "com.squareup.picasso:picasso:2.5.2"
     compile 'uk.co.chrisjenx:calligraphy:2.1.0'
     compile 'com.pnikosis:materialish-progress:1.7'
+    compile 'com.github.niorgai:StatusBarCompat:1.0.1'
 }
 
 buildscript {
