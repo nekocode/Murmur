@@ -8,12 +8,12 @@ import com.orhanobut.hawk.Hawk
  */
 object SettingModel {
 
-    fun loadSelectedMurmurs(): List<Murmur>? {
-        return Hawk.get("selectedMurmurs")
+    fun loadSelectedMurmursIDs(): List<String>? {
+        return Hawk.get("selectedMurmursIDs")
     }
 
-    fun saveSelectedMurmurs(murmurs: List<Murmur>?) {
-        Hawk.put("selectedMurmurs", murmurs)
+    fun saveSelectedMurmursIDs(murmursIDs: List<String>?) {
+        Hawk.put("selectedMurmursIDs", murmursIDs)
     }
 
 }

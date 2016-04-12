@@ -146,12 +146,15 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
         }).bind().subscribe({
             murmurs.addAll(it.first)
 
-            val selectedMurmurs = SettingModel.loadSelectedMurmurs()
+            val selectedMurmurs = SettingModel.loadSelectedMurmursIDs()
             if(selectedMurmurs == null) {
+                // 随机选择两个白噪音
                 playingMurmurs.addAll(murmurs.randomPick(2))
-                SettingModel.saveSelectedMurmurs(playingMurmurs)
+                SettingModel.saveSelectedMurmursIDs(playingMurmurs.map { it.id })
+
             } else {
-                playingMurmurs.addAll(selectedMurmurs)
+                // 读取之前保存的白噪音设置
+                playingMurmurs.addAll(murmurs.filter { selectedMurmurs.contains(it.id) })
             }
 
             MusicService.instance?.playMurmurs(playingMurmurs)
@@ -178,7 +181,7 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
             }
         }
 
-        SettingModel.saveSelectedMurmurs(playingMurmurs)
+        SettingModel.saveSelectedMurmursIDs(playingMurmurs.map { it.id })
 
         MusicService.instance?.playMurmurs(playingMurmurs)
         view?.onMurmursChanged(murmurs, playingMurmurs)
