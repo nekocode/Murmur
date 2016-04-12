@@ -6,6 +6,9 @@ Murmur 是一个添加了 [白噪声](https://zh.wikipedia.org/wiki/%E7%99%BD%E9
 ## 屏幕截图
 ![](art/screenshot1.png) ![](art/screenshot2.png) ![](art/screenshot3.png)
 
+#### OpenGL Shader
+程式中的 Shader 特效本人修改自 [Shadertoy](https://www.shadertoy.com/view/XsfGRn)。
+
 ## 程式主体
 你可以在 [这里](https://github.com/nekocode/murmur/releases/download/0.2.0/Murmur.apk) 下载到它。
 
