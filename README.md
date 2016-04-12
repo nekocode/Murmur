@@ -10,7 +10,7 @@ Murmur 是一个添加了 [白噪声](https://zh.wikipedia.org/wiki/%E7%99%BD%E9
 程式中的 Shader 特效本人修改自 [Shadertoy](https://www.shadertoy.com/view/XsfGRn)。
 
 ## 程式主体
-你可以在 [这里](https://github.com/nekocode/murmur/releases/download/0.2.1/Murmur.apk) 下载到它。
+你可以在 [这里](https://github.com/nekocode/murmur/releases/download/0.2.2/Murmur.apk) 下载到它。
 
 #### 操作说明
 - 您需要使用豆瓣帐号进行登录
