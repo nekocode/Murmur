@@ -72,6 +72,23 @@ class MusicService: Service() {
             it.value.stop()
         }
 
+        // 如果所有白噪音都被停止的话,重新播放以前的
+        murmurPlayers.filter {
+            murmurs.contains(it.key) && !it.value.isPlaying
+
+        }.forEach {
+            val player = it.value
+
+            player.reset()
+            player.isLooping = true
+            player.setDataSource(it.key.file.url)
+            player.prepareAsync()
+            player.setOnPreparedListener {
+                if(!stopMurmurs)
+                    it.start()
+            }
+        }
+
         // 开始播放新选中的白噪音
         stopMurmurs = false
         murmurs.filter {
