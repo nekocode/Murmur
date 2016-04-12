@@ -1,6 +1,5 @@
 package cn.nekocode.murmur.data.model
 
-import cn.nekocode.murmur.data.dto.DoubanSong
 import cn.nekocode.murmur.data.dto.DoubanUser
 import cn.nekocode.murmur.data.exception.DoubanException
 import cn.nekocode.murmur.data.service.DoubanService

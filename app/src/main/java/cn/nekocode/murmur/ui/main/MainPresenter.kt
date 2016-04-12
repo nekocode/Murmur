@@ -16,8 +16,6 @@ import cn.nekocode.murmur.data.model.MurmurModel
 import cn.nekocode.murmur.data.model.SettingModel
 import cn.nekocode.murmur.service.MusicService
 import cn.nekocode.murmur.util.Util.randomPick
-import org.jetbrains.anko.async
-import org.jetbrains.anko.uiThread
 import rx.Observable
 import java.util.*
 
@@ -67,17 +65,7 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
         }
 
         // 异步获取歌曲剩余时间
-        async() {
-            while(view != null) {
-                uiThread {
-                    val time = getTimedText()
-                    if(time != null)
-                        view?.onTimeChanged(time)
-                }
-
-                Thread.sleep(500)
-            }
-        }
+        TimedTextTask.start(view)
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -103,12 +91,15 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
     }
 
     override fun onDestroyView() {
-        view = null
+        // 终止获取歌曲剩余时间的任务
+        TimedTextTask.interrupt()
         super.onDestroyView()
     }
 
+    /**
+     * 停止所有歌曲和白噪音
+     */
     override fun stopAll() {
-        // 暂停歌曲和所有白噪音
         MusicService.instance?.pauseSong()
         MusicService.instance?.stopAllMurmurs()
     }
@@ -181,8 +172,10 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
             }
         }
 
+        // 保存白噪音设置
         SettingModel.saveSelectedMurmursIDs(playingMurmurs.map { it.id })
 
+        // 播放白噪音
         MusicService.instance?.playMurmurs(playingMurmurs)
         view?.onMurmursChanged(murmurs, playingMurmurs)
     }
@@ -196,27 +189,6 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
             MusicService.instance?.playSong(playingSong!!)
             view?.onSongChanged(playingSong!!)
         }, errorHandler)
-    }
-
-    /**
-     * 获取当前歌曲剩余时间
-     */
-    private fun getTimedText(): String? {
-        var text: String? = null
-        MusicService.instance?.apply {
-            if(playingSong.song == null || !playingSong.player.isPlaying)
-                return@apply
-
-            val rest = (playingSong.player.duration - playingSong.player.currentPosition) / 1000
-
-            val m = rest / 60
-            val s = rest % 60
-
-            if(m != 0 && s != 0)
-                text = "$m:$s"
-        }
-
-        return text
     }
 
     /**

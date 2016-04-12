@@ -1,6 +1,5 @@
 package cn.nekocode.murmur.ui.main
 
-import cn.nekocode.murmur.App
 import cn.nekocode.murmur.common.MySingleFragmentActivity
 import org.jetbrains.anko.alert
 

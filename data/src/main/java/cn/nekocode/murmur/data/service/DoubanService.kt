@@ -1,10 +1,8 @@
 package cn.nekocode.murmur.data.service
 
-import android.util.Log
 import cn.nekocode.murmur.data.DataLayer
 import cn.nekocode.murmur.data.dto.DoubanSongWrapper
 import cn.nekocode.murmur.data.dto.DoubanUser
-import com.orhanobut.hawk.LogLevel
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory

@@ -1,9 +1,7 @@
 package cn.nekocode.murmur.data.dto
 
-import java.util.*
 import android.os.Parcel
 import android.os.Parcelable
-
 import com.google.gson.annotations.SerializedName
 
 /**

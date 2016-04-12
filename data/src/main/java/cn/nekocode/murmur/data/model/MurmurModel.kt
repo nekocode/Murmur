@@ -4,7 +4,6 @@ import cn.nekocode.murmur.data.DataLayer
 import cn.nekocode.murmur.data.dto.Murmur
 import cn.nekocode.murmur.data.service.LeancloudService
 import com.orhanobut.hawk.Hawk
-import rx.Notification
 import rx.Observable
 import rx.schedulers.Schedulers
 

@@ -104,7 +104,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
             setImageResource(R.drawable.transparent)
         }
 
-        // 设计背景和文字动画开始颜色
+        // 设计背景和文字颜色渐变动画的开始颜色
         oldBackgroundColor = resources.getColor(R.color.color_primary)
         oldTextColor = Color.WHITE
 

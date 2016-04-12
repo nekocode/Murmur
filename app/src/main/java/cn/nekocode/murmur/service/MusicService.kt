@@ -24,18 +24,18 @@ class MusicService: Service() {
         return MusicServiceBinder()
     }
 
-    val playingSong = SongPlayer(null, MediaPlayer())
-    var stopSong = false
-    val playingMurmurs = hashMapOf<Murmur, MediaPlayer>()
-    var stopMurmurs = false
+    private val songPlayer = SongPlayer(null, MediaPlayer())
+    private val murmurPlayers = hashMapOf<Murmur, MediaPlayer>()
+    private var stopSong = false
+    private var stopMurmurs = false
 
     fun playSong(song: DoubanSong) {
         stopSong = false
 
-        if(song != playingSong.song) {
-            playingSong.song = song
+        if(song != songPlayer.song) {
+            songPlayer.song = song
 
-            val player = playingSong.player
+            val player = songPlayer.player
             player.reset()
             player.isLooping = true
             player.setDataSource(song.url)
@@ -52,28 +52,34 @@ class MusicService: Service() {
             }
 
         } else {
-            if(!playingSong.player.isPlaying) {
-                playingSong.player.start()
+            if(!songPlayer.player.isPlaying) {
+                songPlayer.player.start()
             }
         }
     }
 
     fun pauseSong() {
         stopSong = true
-        playingSong.player.pause()
+        songPlayer.player.pause()
     }
 
     fun playMurmurs(murmurs: List<Murmur>) {
-        playingMurmurs.forEach {
-            if(it.key !in murmurs) {
-                it.value.stop()
-            }
+        // 停止被去掉的白噪音
+        murmurPlayers.filter {
+            !murmurs.contains(it.key)
+
+        }.forEach {
+            it.value.stop()
         }
 
+        // 开始播放新选中的白噪音
         stopMurmurs = false
-        murmurs.forEach {
-            val player = playingMurmurs[it] ?: MediaPlayer()
-            playingMurmurs[it] = player
+        murmurs.filter {
+            !murmurPlayers.containsKey(it)
+
+        }.forEach {
+            val player = murmurPlayers[it] ?: MediaPlayer()
+            murmurPlayers[it] = player
 
             player.reset()
             player.isLooping = true
@@ -88,19 +94,23 @@ class MusicService: Service() {
 
     fun stopAllMurmurs() {
         stopMurmurs = true
-        playingMurmurs.forEach {
+        murmurPlayers.forEach {
             it.value.stop()
         }
     }
 
+    fun isSongPlaying(): Boolean = songPlayer.song != null && songPlayer.player.isPlaying
+
+    fun getRestTime(): Int = (songPlayer.player.duration - songPlayer.player.currentPosition) / 1000
+
     override fun onDestroy() {
         super.onDestroy()
-        playingSong.player.release()
+        songPlayer.player.release()
 
-        playingMurmurs.forEach {
+        murmurPlayers.forEach {
             it.value.release()
         }
-        playingMurmurs.clear()
+        murmurPlayers.clear()
     }
 
     data class SongPlayer(var song: DoubanSong?, var player: MediaPlayer)
