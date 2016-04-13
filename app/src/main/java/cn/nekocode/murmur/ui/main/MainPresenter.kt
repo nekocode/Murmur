@@ -108,7 +108,7 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
      * 登陆豆瓣
      */
     override fun login(email: String, pwd: String) {
-        DoubanModel.login(email, pwd).bind().subscribe({
+        DoubanModel.login(email.trim(), pwd).bind().subscribe({
             user = it
             view?.onLoginSuccess()
             fetchData()
