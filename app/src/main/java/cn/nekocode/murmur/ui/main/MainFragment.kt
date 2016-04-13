@@ -374,7 +374,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
 
         dialog.setOnShowListener {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val email = emailEdit?.text.toString()
+                val email = emailEdit?.text.toString().trim()
                 val pwd = pwdEdit?.text.toString()
 
                 if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
