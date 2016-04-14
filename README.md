@@ -3,7 +3,7 @@
 
 Murmur 是一个带 [白噪声](https://zh.wikipedia.org/wiki/%E7%99%BD%E9%9B%9C%E8%A8%8A) 效果的豆瓣电台第三方客户端。
 
-Murmur 采用 Kotlin / MVP / ReactiveX 进行构建，它是 **[Kotgo](https://github.com/)** 的一个实现案例，详细地描述了如何使用 Kotlin 来构建一个健全的 MVP 项目。如果你对使用 Kotlin 进行 Android 开发十分感兴趣，推荐你对本项目进行研究。
+Murmur 采用 Kotlin / MVP / ReactiveX 进行构建，它是 **[Kotgo](https://github.com/nekocode/kotgo)** 的一个实现案例，详细地描述了如何使用 Kotlin 来构建一个健全的 MVP 项目。如果你对使用 Kotlin 进行 Android 开发十分感兴趣，推荐你对本项目进行研究。
 
 如果你对 MVP 模式十分感兴趣，也请关注该项目，它比大多数你能看到的 MVP 架构的开源应用要正确得多，它的实现更为清晰且思路正确。它解决了一系列能考虑到的问题（生命周期／屏幕旋转），它是更能经得起考验的。
 
