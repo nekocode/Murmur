@@ -23,7 +23,9 @@ class App: Application() {
         }
 
         override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
-            MusicService.instance = (p1 as MusicService.MusicServiceBinder).service
+            if(p1 is MusicService.MusicServiceBinder) {
+                MusicService.instance = p1.service
+            }
         }
     }
 

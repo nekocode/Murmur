@@ -229,7 +229,9 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
 
                 backgroundView.backgroundColor = color
                 renderer.setBackColor(color)
-                StatusBarCompat.setStatusBarColor(activity, color)
+                if(activity?.window != null) {
+                    StatusBarCompat.setStatusBarColor(activity, color)
+                }
 
                 oldBackgroundColor = color
             }

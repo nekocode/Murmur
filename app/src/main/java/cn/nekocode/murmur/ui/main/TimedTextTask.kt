@@ -10,7 +10,9 @@ import org.jetbrains.anko.uiThread
 object TimedTextTask {
     var view: Contract.View? = null
 
-    fun start(view: Contract.View?) {
+    fun start(_view: Contract.View?) {
+        view = _view
+
         // 异步获取歌曲剩余时间
         async() {
             while(view != null) {
