@@ -9,7 +9,7 @@ android {
         applicationId "cn.nekocode.murmur"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 127
+        versionCode 129
         versionName projectVersion
     }
     buildTypes {
