@@ -10,11 +10,10 @@ import cn.nekocode.murmur.service.MusicService
 import com.squareup.leakcanary.LeakCanary
 import org.jetbrains.anko.intentFor
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig
-import kotlin.properties.Delegates
 
 class App: Application() {
     companion object {
-        var instance by Delegates.notNull<App>()
+        lateinit var instance: App
     }
 
     val connection = object: ServiceConnection {

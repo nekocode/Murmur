@@ -13,7 +13,6 @@ import okhttp3.Cache
 import okhttp3.OkHttpClient
 import java.io.File
 import java.util.concurrent.TimeUnit
-import kotlin.properties.Delegates
 
 object DataLayer {
     // OkHttp Config
@@ -23,9 +22,9 @@ object DataLayer {
     const val HTTP_READ_TIMEOUT = 30L
     const val HTTP_WRITE_TIMEOUT = 10L
 
-    var app: Application by Delegates.notNull()
-    var mediaProxy by Delegates.notNull<HttpProxyCacheServer>()
-    var okHttpClient: OkHttpClient by Delegates.notNull()
+    lateinit var app: Application
+    lateinit var mediaProxy: HttpProxyCacheServer
+    lateinit var okHttpClient: OkHttpClient
     val gson: Gson = GsonBuilder().setDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'").create()
 
     fun hook(app: Application) {
