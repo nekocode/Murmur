@@ -17,6 +17,7 @@ import android.util.Patterns
 import android.view.*
 import android.view.animation.AnimationUtils
 import android.view.animation.LinearInterpolator
+import android.view.inputmethod.EditorInfo
 import android.widget.*
 import butterknife.bindView
 import cn.nekocode.kotgo.component.rx.bus
@@ -352,6 +353,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
                     pwdEdit = editText {
                         hint = "Password"
                         textSize = 14f
+                        inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_PASSWORD;
                     }
                 }
             }
