@@ -3,11 +3,11 @@ apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
         applicationId "cn.nekocode.murmur"
-        minSdkVersion 15
+        minSdkVersion 17
         targetSdkVersion 23
         versionCode 129
         versionName projectVersion
@@ -25,7 +25,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile kotlib
     compile project(":data")
-    compile "com.github.nekocode:kotgo:0.8.4"
+    compile "com.github.nekocode:kotgo:1.0.4"
 
     // Android support library
     compile "com.android.support:appcompat-v7:$supportLibVersion"
@@ -33,8 +33,8 @@ dependencies {
     compile "com.android.support:palette-v7:$supportLibVersion"
 
     // Reactive library
-    compile "io.reactivex:rxkotlin:0.40.1"
-    compile "io.reactivex:rxandroid:1.1.0"
+    compile "io.reactivex:rxkotlin:0.55.0"
+    compile "io.reactivex:rxandroid:1.2.0"
 
     // DSL
     compile 'org.jetbrains.anko:anko-sdk15:0.8.3' // sdk19, sdk21, sdk23 are also available
@@ -49,14 +49,4 @@ dependencies {
     compile 'uk.co.chrisjenx:calligraphy:2.1.0'
     compile 'com.pnikosis:materialish-progress:1.7'
     compile 'com.github.niorgai:StatusBarCompat:1.0.1'
-}
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlinVersion"
-    }
 }

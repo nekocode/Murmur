@@ -19,8 +19,9 @@ import android.view.animation.AnimationUtils
 import android.view.animation.LinearInterpolator
 import android.widget.*
 import butterknife.bindView
-import cn.nekocode.kotgo.component.rx.bus
+import cn.nekocode.kotgo.component.rx.RxBus
 import cn.nekocode.kotgo.component.ui.BaseFragment
+import cn.nekocode.kotgo.component.ui.FragmentActivity
 import cn.nekocode.murmur.R
 import cn.nekocode.murmur.data.dto.DoubanSong
 import cn.nekocode.murmur.data.dto.Murmur
@@ -35,10 +36,16 @@ import qiu.niorgai.StatusBarCompat
 import kotlin.properties.Delegates
 
 class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
-    override val layoutId: Int = R.layout.fragment_main
-    val presenter: Contract.Presenter by lazy {
-        bindPresenter<MainPresenter>()
+    companion object {
+        const val TAG = "MainFragment"
+
+        fun push(fragmentActivity: FragmentActivity) {
+            fragmentActivity.push(TAG, MainFragment::class.java)
+        }
     }
+
+    override val layoutId: Int = R.layout.fragment_main
+    lateinit var presenter: MainPresenter
 
     val surfaceView: GLSurfaceView by bindView(R.id.surfaceView)
     var renderer: ShaderRenderer by Delegates.notNull()
@@ -69,7 +76,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         super.onViewCreated(view, savedInstanceState)
 
         // 绑定 Presenter
-        presenter
+        presenter = bindPresenter<MainPresenter>()
 
         // 初始化渲染器
         surfaceView.apply {
@@ -109,12 +116,10 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         oldTextColor = Color.WHITE
 
         // 订阅事件总线
-        bus {
-            subscribe(String::class.java) {
-                if (it.equals("Prepared")) {
-                    isPaletteChanging = false
-                    progressWheel.visibility = View.INVISIBLE
-                }
+        RxBus.subscribe(String::class.java) {
+            if (it.equals("Prepared")) {
+                isPaletteChanging = false
+                progressWheel.visibility = View.INVISIBLE
             }
         }
     }

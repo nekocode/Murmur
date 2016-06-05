@@ -1,11 +1,11 @@
-package cn.nekocode.murmur.data.model
+package cn.nekocode.murmur.data.repo
 
 import com.orhanobut.hawk.Hawk
 
 /**
  * Created by nekocode on 16/3/22.
  */
-object SettingModel {
+object SettingRepo {
 
     fun loadSelectedMurmursIDs(): List<String>? {
         return Hawk.get("selectedMurmursIDs")

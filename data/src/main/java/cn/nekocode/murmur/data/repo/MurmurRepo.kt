@@ -1,4 +1,4 @@
-package cn.nekocode.murmur.data.model
+package cn.nekocode.murmur.data.repo
 
 import cn.nekocode.murmur.data.DataLayer
 import cn.nekocode.murmur.data.dto.Murmur
@@ -10,7 +10,7 @@ import rx.schedulers.Schedulers
 /**
  * Created by nekocode on 3/13/16.
  */
-object MurmurModel {
+object MurmurRepo {
 
     fun getMurmurs(): Observable<List<Murmur>> =
             LeancloudService.api.getMurmurs(50, "-updatedAt")

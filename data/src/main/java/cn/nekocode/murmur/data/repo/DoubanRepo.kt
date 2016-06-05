@@ -1,4 +1,4 @@
-package cn.nekocode.murmur.data.model
+package cn.nekocode.murmur.data.repo
 
 import cn.nekocode.murmur.data.dto.DoubanUser
 import cn.nekocode.murmur.data.exception.DoubanException
@@ -10,7 +10,7 @@ import rx.schedulers.Schedulers
 /**
  * Created by nekocode on 3/13/16.
  */
-object DoubanModel {
+object DoubanRepo {
 
     fun getCachedUserInfo(): Pair<String, String>? {
         val email: String = Hawk.get("email") ?: return null

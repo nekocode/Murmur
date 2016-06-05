@@ -2,25 +2,24 @@ package cn.nekocode.murmur.ui.main
 
 import android.app.Activity
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import cn.nekocode.kotgo.component.rx.bus
-import cn.nekocode.murmur.common.MyPresenter
+import cn.nekocode.kotgo.component.rx.RxBus
+import cn.nekocode.kotgo.component.rx.bindLifecycle
+import cn.nekocode.kotgo.component.rx.onUI
+import cn.nekocode.kotgo.component.ui.BasePresenter
 import cn.nekocode.murmur.data.dto.DoubanSong
 import cn.nekocode.murmur.data.dto.DoubanUser
 import cn.nekocode.murmur.data.dto.Murmur
 import cn.nekocode.murmur.data.exception.DoubanException
-import cn.nekocode.murmur.data.model.DoubanModel
-import cn.nekocode.murmur.data.model.MurmurModel
-import cn.nekocode.murmur.data.model.SettingModel
+import cn.nekocode.murmur.data.repo.DoubanRepo
+import cn.nekocode.murmur.data.repo.MurmurRepo
+import cn.nekocode.murmur.data.repo.SettingRepo
 import cn.nekocode.murmur.service.MusicService
 import cn.nekocode.murmur.util.Util.randomPick
 import rx.Observable
 import java.util.*
 
 
-class MainPresenter(): MyPresenter(), Contract.Presenter {
+class MainPresenter(): BasePresenter(), Contract.Presenter {
     var view: Contract.View? = null
 
     var user: DoubanUser? = null
@@ -45,7 +44,7 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
 
         } else {
             // 检查是否已经登录
-            val cachedUser = DoubanModel.getCachedUserInfo()
+            val cachedUser = DoubanRepo.getCachedUserInfo()
             if(cachedUser == null) {
                 view?.showLoginDialog()
             } else {
@@ -56,11 +55,9 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
 
         // 订阅播放结束事件
         // TODO: 16/4/11 控制播放循环
-        bus {
-            subscribe(String::class.java) {
-                if(it.equals("Finished")) {
+        RxBus.subscribe(String::class.java) {
+            if(it.equals("Finished")) {
 
-                }
             }
         }
 
@@ -68,14 +65,13 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
         TimedTextTask.start(view)
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onVewCreated(savedInstanceState: Bundle?) {
         if(savedInstanceState != null) {
             // 恢复现场
             this.view?.onMurmursChanged(murmurs, playingMurmurs)
             this.view?.onSongChanged(playingSong!!)
 
         }
-        return super.onCreateView(inflater, container, savedInstanceState)
     }
 
     /**
@@ -108,7 +104,7 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
      * 登陆豆瓣
      */
     override fun login(email: String, pwd: String) {
-        DoubanModel.login(email, pwd).bind().subscribe({
+        DoubanRepo.login(email, pwd).onUI().bindLifecycle(this).subscribe({
             user = it
             view?.onLoginSuccess()
             fetchData()
@@ -130,18 +126,18 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
      * 获取歌曲和白噪音
      */
     private fun fetchData() {
-        Observable.combineLatest(MurmurModel.getMurmurs(), DoubanModel.nextSong(user!!), {
+        Observable.combineLatest(MurmurRepo.getMurmurs(), DoubanRepo.nextSong(user!!), {
             murmurs, song ->
             Pair(murmurs, song)
 
-        }).bind().subscribe({
+        }).onUI().bindLifecycle(this).subscribe({
             murmurs.addAll(it.first)
 
-            val selectedMurmurs = SettingModel.loadSelectedMurmursIDs()
+            val selectedMurmurs = SettingRepo.loadSelectedMurmursIDs()
             if(selectedMurmurs == null) {
                 // 随机选择两个白噪音
                 playingMurmurs.addAll(murmurs.randomPick(2))
-                SettingModel.saveSelectedMurmursIDs(playingMurmurs.map { it.id })
+                SettingRepo.saveSelectedMurmursIDs(playingMurmurs.map { it.id })
 
             } else {
                 // 读取之前保存的白噪音设置
@@ -173,7 +169,7 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
         }
 
         // 保存白噪音设置
-        SettingModel.saveSelectedMurmursIDs(playingMurmurs.map { it.id })
+        SettingRepo.saveSelectedMurmursIDs(playingMurmurs.map { it.id })
 
         // 播放白噪音
         MusicService.instance?.playMurmurs(playingMurmurs)
@@ -184,7 +180,7 @@ class MainPresenter(): MyPresenter(), Contract.Presenter {
      * 切换歌曲
      */
     override fun nextSong() {
-        DoubanModel.nextSong(user!!).bind().subscribe({
+        DoubanRepo.nextSong(user!!).onUI().bindLifecycle(this).subscribe({
             playingSong = it
             MusicService.instance?.playSong(playingSong!!)
             view?.onSongChanged(playingSong!!)
