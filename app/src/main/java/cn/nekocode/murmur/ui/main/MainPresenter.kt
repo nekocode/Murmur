@@ -43,6 +43,7 @@ class MainPresenter(): BasePresenter(), Contract.Presenter {
             playingSong = savedInstanceState.getParcelable("playingSong")
 
         } else {
+
             // 检查是否已经登录
             val cachedUser = DoubanRepo.getCachedUserInfo()
             if(cachedUser == null) {
