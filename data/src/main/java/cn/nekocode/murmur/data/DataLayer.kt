@@ -2,13 +2,9 @@ package cn.nekocode.murmur.data
 
 import android.app.Application
 import com.danikula.videocache.HttpProxyCacheServer
-import com.facebook.stetho.Stetho
-import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.orhanobut.hawk.Hawk
-import com.orhanobut.hawk.HawkBuilder
-import com.orhanobut.hawk.LogLevel
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import java.io.File
@@ -30,11 +26,7 @@ object DataLayer {
     fun hook(app: Application) {
         DataLayer.app = app
 
-        Hawk.init(app)
-                .setEncryptionMethod(HawkBuilder.EncryptionMethod.MEDIUM)
-                .setStorage(HawkBuilder.newSqliteStorage(app))
-                .setLogLevel(LogLevel.FULL)
-                .build()
+        Hawk.init(app).build()
 
         mediaProxy = HttpProxyCacheServer.Builder(app)
                 .maxCacheSize(512 * 1024 * 1024)
@@ -46,9 +38,6 @@ object DataLayer {
                 .connectTimeout(HTTP_CONNECT_TIMEOUT, TimeUnit.SECONDS)
                 .writeTimeout(HTTP_WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(HTTP_READ_TIMEOUT, TimeUnit.SECONDS)
-                .addNetworkInterceptor(StethoInterceptor())
                 .build()
-
-        Stetho.initializeWithDefaults(app)
     }
 }

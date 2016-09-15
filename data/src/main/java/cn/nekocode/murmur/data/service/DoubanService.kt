@@ -1,49 +1,34 @@
 package cn.nekocode.murmur.data.service
 
 import cn.nekocode.murmur.data.DataLayer
-import cn.nekocode.murmur.data.dto.DoubanSongWrapper
-import cn.nekocode.murmur.data.dto.DoubanUser
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.*
-import rx.Observable
 
 
-class DoubanService {
-    companion object {
-        private const val API_HOST_URL = "https://www.douban.com/j/app/"
-        val api: APIs
+internal object DoubanService {
+    const val API_HOST_URL = "https://api.douban.com"
+    const val TOKEN_HOST_URL = "https://www.douban.com"
 
-        init {
-            val restAdapter = Retrofit.Builder()
-                    .baseUrl(API_HOST_URL)
-                    .addConverterFactory(GsonConverterFactory.create(DataLayer.gson))
-                    .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                    .client(DataLayer.okHttpClient)
-                    .build()
+    const val APP_NAME = "radio_android"
+    const val VERSION= "642"
+    const val PUSH_DEVICE_ID = "534fa03e331b42dbb7487e8784ce50cbbf0acf13"
 
-            api = restAdapter.create(APIs::class.java)
-        }
-    }
+    const val KEY = "02f7751a55066bcb08e65f4eff134361"
+    const val SECRET = "63cf04ebd7b0ff3b"
+    const val REDIRECT_URI = "http://douban.fm"
 
-    interface APIs {
-        @FormUrlEncoded
-        @POST("login")
-        fun login(@Field("app_name") appName: String,
-                  @Field("version") version: String,
-                  @Field("email") email: String,
-                  @Field("password") password: String):
-                Observable<DoubanUser>
+    val API_REST_ADAPTER: Retrofit = Retrofit.Builder()
+            .baseUrl(API_HOST_URL)
+            .addConverterFactory(GsonConverterFactory.create(DataLayer.gson))
+            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+            .client(DataLayer.okHttpClient)
+            .build()
 
-        @GET("radio/people")
-        fun getSongs(@Query("app_name") appName: String,
-                     @Query("version") version: String,
-                     @Query("user_id") userId: String,
-                     @Query("token") token: String,
-                     @Query("expire") expire: Long,
-                     @Query("channel") channel: String,
-                     @Query("type") type: String):
-                Observable<DoubanSongWrapper>
-    }
+    val TOKEN_REST_ADAPTER: Retrofit = Retrofit.Builder()
+            .baseUrl(TOKEN_HOST_URL)
+            .addConverterFactory(GsonConverterFactory.create(DataLayer.gson))
+            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+            .client(DataLayer.okHttpClient)
+            .build()
 }

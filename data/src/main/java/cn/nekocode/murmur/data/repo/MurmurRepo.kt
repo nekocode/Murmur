@@ -2,7 +2,7 @@ package cn.nekocode.murmur.data.repo
 
 import cn.nekocode.murmur.data.DataLayer
 import cn.nekocode.murmur.data.dto.Murmur
-import cn.nekocode.murmur.data.service.LeancloudService
+import cn.nekocode.murmur.data.service.Api.Leancloud
 import com.orhanobut.hawk.Hawk
 import rx.Observable
 import rx.schedulers.Schedulers
@@ -13,7 +13,7 @@ import rx.schedulers.Schedulers
 object MurmurRepo {
 
     fun getMurmurs(): Observable<List<Murmur>> =
-            LeancloudService.api.getMurmurs(50, "-updatedAt")
+            Leancloud.API.getMurmurs(50, "-updatedAt")
                     .subscribeOn(Schedulers.io())
                     .map {
                         val murmurs = it.results
