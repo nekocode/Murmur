@@ -13,7 +13,7 @@ interface Contract {
         fun onLoginFailed()
 
         fun onMurmursChanged(all: List<Murmur>, playing: List<Murmur>)
-        fun onSongChanged(song: DoubanSong)
+        fun onSongChanged(song: DoubanSong.Song)
         fun onTimeChanged(timedText: String)
 
         fun showToast(msg: String)

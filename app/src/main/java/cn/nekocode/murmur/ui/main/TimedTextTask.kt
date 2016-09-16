@@ -1,7 +1,7 @@
 package cn.nekocode.murmur.ui.main
 
 import cn.nekocode.murmur.service.MusicService
-import org.jetbrains.anko.async
+import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 
 /**
@@ -14,7 +14,7 @@ object TimedTextTask {
         view = _view
 
         // 异步获取歌曲剩余时间
-        async() {
+        doAsync {
             while(view != null) {
                 uiThread {
                     val time = getTimedText()

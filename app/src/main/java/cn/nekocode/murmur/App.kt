@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.ServiceConnection
 import android.os.IBinder
 import cn.nekocode.murmur.data.DataLayer
+import cn.nekocode.murmur.data.push.DoubanMqtt
 import cn.nekocode.murmur.service.MusicService
 import com.squareup.leakcanary.LeakCanary
 import org.jetbrains.anko.intentFor
@@ -43,6 +44,8 @@ class App: Application() {
         LeakCanary.install(this)
         DataLayer.hook(this)
         bindService()
+
+        DoubanMqtt(this).connect()
 
         CalligraphyConfig.initDefault(
                 CalligraphyConfig.Builder()

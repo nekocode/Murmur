@@ -9,8 +9,8 @@ import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.opengl.GLSurfaceView
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.graphics.Palette
 import android.text.TextUtils
 import android.util.Patterns
@@ -18,7 +18,6 @@ import android.view.*
 import android.view.animation.AnimationUtils
 import android.view.animation.LinearInterpolator
 import android.widget.*
-import butterknife.bindView
 import cn.nekocode.kotgo.component.rx.RxBus
 import cn.nekocode.kotgo.component.ui.BaseFragment
 import cn.nekocode.kotgo.component.ui.FragmentActivity
@@ -28,9 +27,9 @@ import cn.nekocode.murmur.data.dto.Murmur
 import cn.nekocode.murmur.util.CircleTransform
 import cn.nekocode.murmur.util.ImageUtil
 import cn.nekocode.murmur.widget.ShaderRenderer
-import com.pnikosis.materialishprogress.ProgressWheel
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
+import kotlinx.android.synthetic.main.fragment_main.*
 import org.jetbrains.anko.*
 import qiu.niorgai.StatusBarCompat
 import kotlin.properties.Delegates
@@ -47,18 +46,8 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
     override val layoutId: Int = R.layout.fragment_main
     lateinit var presenter: MainPresenter
 
-    val surfaceView: GLSurfaceView by bindView(R.id.surfaceView)
-    var renderer: ShaderRenderer by Delegates.notNull()
-
-    val backgroundView: View by bindView(R.id.relativeLayout)
-    val coverImageView: ImageSwitcher by bindView(R.id.coverImageView)
-    val progressWheel: ProgressWheel by bindView(R.id.progressWheel)
-    val titleTextView: TextView by bindView(R.id.titleTextView)
-    val performerTextView: TextView by bindView(R.id.performerTextView)
-    val murmursTextView: TextView by bindView(R.id.murmursTextView)
-    val timeTextView: TextView by bindView(R.id.timeTextView)
-
     val ANIMATION_DURATION = 800L
+    var renderer: ShaderRenderer by Delegates.notNull()
     var oldBackgroundColor = 0
     var oldTextColor = 0
     var backgroundColorAnimator: ValueAnimator? = null
@@ -85,7 +74,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
 
             val shader = resources.openRawResource(R.raw.shader).reader().readText()
             renderer = ShaderRenderer(activity, shader).apply {
-                setBackColor(resources.getColor(R.color.color_primary_dark))
+                setBackColor(ContextCompat.getColor(ctx, R.color.color_primary_dark))
                 setSpeed(0.6f)
 
                 surfaceView.setRenderer(this)
@@ -112,7 +101,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         }
 
         // 设计背景和文字颜色渐变动画的开始颜色
-        oldBackgroundColor = resources.getColor(R.color.color_primary)
+        oldBackgroundColor = ContextCompat.getColor(ctx, R.color.color_primary)
         oldTextColor = Color.WHITE
 
         // 订阅事件总线
@@ -124,7 +113,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         }
     }
 
-    fun finish() {
+    override fun onDestroy() {
         presenter.stopAll()
     }
 
@@ -193,7 +182,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         }
     }
 
-    override fun onSongChanged(song: DoubanSong) {
+    override fun onSongChanged(song: DoubanSong.Song) {
         isPaletteChanging = true
 
         song.apply {
@@ -338,14 +327,14 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         })
     }
 
-    val loginDialog by lazy {
+    val loginDialog: AlertDialog by lazy {
         var emailEdit: EditText? = null
         var pwdEdit: EditText? = null
 
-        val dialog = alert("Login Your Douban Account") {
-            cancellable(false)
+        val dialog = AlertDialog.Builder(ctx).apply {
+            setCancelable(false)
 
-            customView {
+            setView(ctx.UI({
                 verticalLayout() {
                     padding = dip(30)
 
@@ -359,11 +348,11 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
                         textSize = 14f
                     }
                 }
-            }
+            }).view)
 
-            positiveButton("Login") {}
+            setPositiveButton("Login") { dialog, which -> }
 
-            onKey { keyCode, keyEvent ->
+            setOnKeyListener() { dialog, keyCode, keyEvent ->
                 if (keyCode == KeyEvent.KEYCODE_BACK && keyEvent.action == KeyEvent.ACTION_DOWN) {
                     alert("Are you want to exit?") {
                         negativeButton("No") {
@@ -376,7 +365,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
                 }
                 false
             }
-        }.builder.create()
+        }.create()
 
         dialog.setOnShowListener {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {

@@ -29,7 +29,7 @@ class MusicService: Service() {
     private var stopSong = false
     private var stopMurmurs = false
 
-    fun playSong(song: DoubanSong) {
+    fun playSong(song: DoubanSong.Song) {
         stopSong = false
 
         if(song != songPlayer.song) {
@@ -130,5 +130,5 @@ class MusicService: Service() {
         murmurPlayers.clear()
     }
 
-    data class SongPlayer(var song: DoubanSong?, var player: MediaPlayer)
+    data class SongPlayer(var song: DoubanSong.Song?, var player: MediaPlayer)
 }

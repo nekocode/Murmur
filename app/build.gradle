@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 23
@@ -48,4 +49,13 @@ dependencies {
     compile 'uk.co.chrisjenx:calligraphy:2.1.0'
     compile 'com.pnikosis:materialish-progress:1.7'
     compile 'com.github.niorgai:StatusBarCompat:1.0.1'
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlinVersion"
+    }
 }

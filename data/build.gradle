@@ -20,22 +20,33 @@ android {
 }
 
 def retrofitVersion = "2.1.0"
+def paperparcelVersion = "1.0.0"
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     testCompile "org.robolectric:robolectric:3.1.2"
 
+    compile "com.android.support:support-v4:$supportLibVersion"
+
     // Retrofit
     compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
     compile "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     compile "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
+
+    // Mqtt
+    compile group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version: '1.1.0'
 
     // Storage library
     compile 'com.orhanobut:hawk:2.0.0-Alpha'
 
     // MediaPlyaer Proxy
     compile 'com.danikula:videocache:2.6.1'
+
+    // Instance State
+    compile "com.github.grandstaish.paperparcel:paperparcel:$paperparcelVersion"
+    compile "com.github.grandstaish.paperparcel:paperparcel-kotlin:$paperparcelVersion"
+    kapt "com.github.grandstaish.paperparcel:compiler:$paperparcelVersion"
 
     compile kotlib
 }

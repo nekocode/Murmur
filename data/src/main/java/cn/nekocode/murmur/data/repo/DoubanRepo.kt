@@ -36,7 +36,7 @@ object DoubanRepo {
 //                    }
 
 
-    fun nextSong(user: DoubanUser) = Observable.create<DoubanSong> {  };
+    fun nextSong(user: DoubanUser) = Observable.create<DoubanSong.Song> {  };
 //            DoubanService.api.getSongs("radio_android", "100",
 //                    user.id, user.token, user.expire, "0", "n")
 //

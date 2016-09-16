@@ -26,30 +26,6 @@ class DoubanServiceTest {
         DataLayer.hook(RuntimeEnvironment.application)
     }
 
-//    private fun getMqttPingPi(): PendingIntent {
-//        val intent = Intent("com.douban.artery.action.MQTT_PING")
-//        intent.setClass(this, PushService::class.java)
-//        return PendingIntent.getService(this, 0, intent, 134217728)
-//    }
-//
-//    fun testMQtt() {
-//        if (this.mMqtt == null) {
-//            val pingSender = AndroidPingSender(this, getMqttPingPi())
-//            val callback = MqttConnectionCallback(this)
-//            this.mMqtt = MqttClient(this,
-//                    MqttConfig(
-//                            "ssl://push.douban.com:4392",
-//                            290,
-//                            ServiceUtils.getCurrentDeviceInfo(this, getMyDeviceId()),   // username
-//                            pingSender,
-//                            callback
-//                    )
-//            )
-//
-//        }
-//        return this.mMqtt
-//    }
-
     @Test
     fun testDoubanApis() {
         // Test login()

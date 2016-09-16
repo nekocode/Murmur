@@ -9,6 +9,7 @@ import cn.nekocode.kotgo.component.ui.BasePresenter
 import cn.nekocode.murmur.data.dto.DoubanSong
 import cn.nekocode.murmur.data.dto.DoubanUser
 import cn.nekocode.murmur.data.dto.Murmur
+import cn.nekocode.murmur.data.dto.SongParcel
 import cn.nekocode.murmur.data.exception.DoubanException
 import cn.nekocode.murmur.data.repo.DoubanRepo
 import cn.nekocode.murmur.data.repo.MurmurRepo
@@ -25,7 +26,7 @@ class MainPresenter(): BasePresenter(), Contract.Presenter {
     var user: DoubanUser? = null
     val murmurs = ArrayList<Murmur>()
     val playingMurmurs = ArrayList<Murmur>()
-    var playingSong: DoubanSong? = null
+    var playingSong: DoubanSong.Song? = null
 
     override fun onAttach(activity: Activity?) {
         super.onAttach(activity)
@@ -40,7 +41,7 @@ class MainPresenter(): BasePresenter(), Contract.Presenter {
             user = savedInstanceState.getParcelable("user")
             murmurs.addAll(savedInstanceState.getParcelableArrayList("murmurs"))
             playingMurmurs.addAll(savedInstanceState.getParcelableArrayList("playingMurmurs"))
-            playingSong = savedInstanceState.getParcelable("playingSong")
+            playingSong = savedInstanceState.getParcelable<SongParcel>("playingSong").data
 
         } else {
 
@@ -82,7 +83,7 @@ class MainPresenter(): BasePresenter(), Contract.Presenter {
         outState?.putParcelable("user", user)
         outState?.putParcelableArrayList("murmurs", murmurs)
         outState?.putParcelableArrayList("playingMurmurs", playingMurmurs)
-        outState?.putParcelable("playingSong", playingSong)
+        outState?.putParcelable("playingSong", SongParcel(playingSong))
 
         super.onSaveInstanceState(outState)
     }
