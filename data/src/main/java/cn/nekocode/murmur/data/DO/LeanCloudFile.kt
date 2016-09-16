@@ -1,4 +1,4 @@
-package cn.nekocode.murmur.data.dto
+package cn.nekocode.murmur.data.DO
 
 import android.os.Parcel
 import android.os.Parcelable

@@ -6,8 +6,8 @@ import android.media.MediaPlayer
 import android.os.Binder
 import android.os.IBinder
 import cn.nekocode.kotgo.component.rx.RxBus
-import cn.nekocode.murmur.data.dto.DoubanSong
-import cn.nekocode.murmur.data.dto.Murmur
+import cn.nekocode.murmur.data.DO.douban.SongS
+import cn.nekocode.murmur.data.DO.Murmur
 
 /**
  * Created by nekocode on 3/15/16.
@@ -29,7 +29,7 @@ class MusicService: Service() {
     private var stopSong = false
     private var stopMurmurs = false
 
-    fun playSong(song: DoubanSong.Song) {
+    fun playSong(song: SongS.Song) {
         stopSong = false
 
         if(song != songPlayer.song) {
@@ -130,5 +130,5 @@ class MusicService: Service() {
         murmurPlayers.clear()
     }
 
-    data class SongPlayer(var song: DoubanSong.Song?, var player: MediaPlayer)
+    data class SongPlayer(var song: SongS.Song?, var player: MediaPlayer)
 }

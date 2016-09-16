@@ -1,6 +1,6 @@
 package cn.nekocode.murmur.data.service.Api
 
-import cn.nekocode.murmur.data.dto.DoubanSong
+import cn.nekocode.murmur.data.DO.douban.SongS
 import cn.nekocode.murmur.data.service.DoubanService
 import retrofit2.http.*
 import rx.Observable
@@ -20,7 +20,7 @@ internal interface DoubanFM {
             @Query("version") version: String = DoubanService.VERSION,
             @Query("push_device_id") push_device_id: String = DoubanService.PUSH_DEVICE_ID
 
-    ): Observable<DoubanSong.Ids>
+    ): Observable<SongS.Ids>
 
     @GET("v2/fm/song/{sid}")
     fun getSong(
@@ -30,5 +30,5 @@ internal interface DoubanFM {
             @Query("version") version: String = DoubanService.VERSION,
             @Query("push_device_id") push_device_id: String = DoubanService.PUSH_DEVICE_ID
 
-    ): Observable<DoubanSong.Song>
+    ): Observable<SongS.Song>
 }

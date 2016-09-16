@@ -6,10 +6,10 @@ import cn.nekocode.kotgo.component.rx.RxBus
 import cn.nekocode.kotgo.component.rx.bindLifecycle
 import cn.nekocode.kotgo.component.rx.onUI
 import cn.nekocode.kotgo.component.ui.BasePresenter
-import cn.nekocode.murmur.data.dto.DoubanSong
-import cn.nekocode.murmur.data.dto.DoubanUser
-import cn.nekocode.murmur.data.dto.Murmur
-import cn.nekocode.murmur.data.dto.SongParcel
+import cn.nekocode.murmur.data.DO.douban.SongS
+import cn.nekocode.murmur.data.DO.douban.User
+import cn.nekocode.murmur.data.DO.Murmur
+import cn.nekocode.murmur.data.DO.douban.SongParcel
 import cn.nekocode.murmur.data.exception.DoubanException
 import cn.nekocode.murmur.data.repo.DoubanRepo
 import cn.nekocode.murmur.data.repo.MurmurRepo
@@ -23,10 +23,10 @@ import java.util.*
 class MainPresenter(): BasePresenter(), Contract.Presenter {
     var view: Contract.View? = null
 
-    var user: DoubanUser? = null
+    var user: User? = null
     val murmurs = ArrayList<Murmur>()
     val playingMurmurs = ArrayList<Murmur>()
-    var playingSong: DoubanSong.Song? = null
+    var playingSong: SongS.Song? = null
 
     override fun onAttach(activity: Activity?) {
         super.onAttach(activity)

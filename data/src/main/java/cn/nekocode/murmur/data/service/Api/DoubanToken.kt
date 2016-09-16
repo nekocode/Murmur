@@ -1,6 +1,6 @@
 package cn.nekocode.murmur.data.service.Api
 
-import cn.nekocode.murmur.data.dto.DoubanSession
+import cn.nekocode.murmur.data.DO.douban.Session
 import cn.nekocode.murmur.data.service.DoubanService
 import retrofit2.http.*
 import rx.Observable
@@ -25,5 +25,5 @@ internal interface DoubanToken {
             @Field("grant_type") grant_type: String = "password",
             @Field("apikey") apikey: String = DoubanService.KEY
 
-    ) : Observable<DoubanSession>
+    ) : Observable<Session>
 }

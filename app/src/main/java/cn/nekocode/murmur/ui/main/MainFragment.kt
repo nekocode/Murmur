@@ -22,8 +22,8 @@ import cn.nekocode.kotgo.component.rx.RxBus
 import cn.nekocode.kotgo.component.ui.BaseFragment
 import cn.nekocode.kotgo.component.ui.FragmentActivity
 import cn.nekocode.murmur.R
-import cn.nekocode.murmur.data.dto.DoubanSong
-import cn.nekocode.murmur.data.dto.Murmur
+import cn.nekocode.murmur.data.DO.douban.SongS
+import cn.nekocode.murmur.data.DO.Murmur
 import cn.nekocode.murmur.util.CircleTransform
 import cn.nekocode.murmur.util.ImageUtil
 import cn.nekocode.murmur.widget.ShaderRenderer
@@ -182,7 +182,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         }
     }
 
-    override fun onSongChanged(song: DoubanSong.Song) {
+    override fun onSongChanged(song: SongS.Song) {
         isPaletteChanging = true
 
         song.apply {

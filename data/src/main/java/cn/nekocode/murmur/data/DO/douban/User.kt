@@ -1,4 +1,4 @@
-package cn.nekocode.murmur.data.dto
+package cn.nekocode.murmur.data.DO.douban
 
 import android.os.Parcel
 import android.os.Parcelable
@@ -7,7 +7,7 @@ import com.google.gson.annotations.SerializedName
 /**
  * Created by nekocode on 3/15/16.
  */
-data class DoubanUser(
+data class User(
         @SerializedName("user_id") val id: String,
         val token: String,
         val expire: Long,
@@ -29,12 +29,12 @@ data class DoubanUser(
     }
 
     companion object {
-        @JvmField final val CREATOR: Parcelable.Creator<DoubanUser> = object : Parcelable.Creator<DoubanUser> {
-            override fun createFromParcel(source: Parcel): DoubanUser {
-                return DoubanUser(source)
+        @JvmField final val CREATOR: Parcelable.Creator<User> = object : Parcelable.Creator<User> {
+            override fun createFromParcel(source: Parcel): User {
+                return User(source)
             }
 
-            override fun newArray(size: Int): Array<DoubanUser?> {
+            override fun newArray(size: Int): Array<User?> {
                 return arrayOfNulls(size)
             }
         }

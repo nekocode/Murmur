@@ -1,6 +1,6 @@
 package cn.nekocode.murmur.data.service.Api
 
-import cn.nekocode.murmur.data.dto.Murmur
+import cn.nekocode.murmur.data.DO.Murmur
 import cn.nekocode.murmur.data.service.LeancloudService
 import retrofit2.http.GET
 import retrofit2.http.Headers

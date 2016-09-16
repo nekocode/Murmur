@@ -1,7 +1,7 @@
 package cn.nekocode.murmur.data.repo
 
-import cn.nekocode.murmur.data.dto.DoubanSong
-import cn.nekocode.murmur.data.dto.DoubanUser
+import cn.nekocode.murmur.data.DO.douban.SongS
+import cn.nekocode.murmur.data.DO.douban.User
 import cn.nekocode.murmur.data.exception.DoubanException
 import cn.nekocode.murmur.data.service.DoubanService
 import com.orhanobut.hawk.Hawk
@@ -21,7 +21,7 @@ object DoubanRepo {
         return Pair(email, pwd)
     }
 
-    fun login(email: String, pwd: String) = Observable.create<DoubanUser> {  };
+    fun login(email: String, pwd: String) = Observable.create<User> {  };
 //            DoubanService.api.login("radio_android", "100", email, pwd)
 //                    .subscribeOn(Schedulers.io())
 //                    .map {
@@ -36,7 +36,7 @@ object DoubanRepo {
 //                    }
 
 
-    fun nextSong(user: DoubanUser) = Observable.create<DoubanSong.Song> {  };
+    fun nextSong(user: User) = Observable.create<SongS.Song> {  };
 //            DoubanService.api.getSongs("radio_android", "100",
 //                    user.id, user.token, user.expire, "0", "n")
 //

@@ -1,7 +1,7 @@
 package cn.nekocode.murmur.data.repo
 
 import cn.nekocode.murmur.data.DataLayer
-import cn.nekocode.murmur.data.dto.Murmur
+import cn.nekocode.murmur.data.DO.Murmur
 import cn.nekocode.murmur.data.service.Api.Leancloud
 import com.orhanobut.hawk.Hawk
 import rx.Observable

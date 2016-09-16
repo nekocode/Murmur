@@ -1,4 +1,4 @@
-package cn.nekocode.murmur.data.dto
+package cn.nekocode.murmur.data.DO.douban
 
 import com.google.gson.annotations.SerializedName
 import nz.bradcampbell.paperparcel.PaperParcel
@@ -6,7 +6,7 @@ import nz.bradcampbell.paperparcel.PaperParcel
 /**
  * Created by nekocode on 3/15/16.
  */
-object DoubanSong {
+object SongS {
     class Ids(
             @SerializedName("songs") val songs: List<Id>
     )
