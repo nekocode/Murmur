@@ -1,10 +1,8 @@
 package cn.nekocode.murmur.data
 
-import cn.nekocode.murmur.data.DO.douban.ClientId
 import cn.nekocode.murmur.data.DO.douban.Session
 import cn.nekocode.murmur.data.DO.douban.SongS
 import cn.nekocode.murmur.data.service.Api.DoubanFM
-import cn.nekocode.murmur.data.service.Api.DoubanPush
 import cn.nekocode.murmur.data.service.Api.DoubanToken
 import org.junit.Assert
 import org.junit.Before
@@ -14,6 +12,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import rx.observers.TestSubscriber
+import java.util.*
 
 /**
  * Created by nekocode on 16/9/14.
@@ -32,7 +31,8 @@ class DoubanServiceTest {
         // Test login()
         val session = TestSubscriber<Session>().apply {
 
-            DoubanToken.API.login("syfyw@qq.com", "110110zxc")
+//            DoubanToken.API.login("", "")  // TODO Replace your username and password
+            DoubanToken.API.login("syfyw@qq.com", "110110zxc")  // TODO Replace your username and password
                     .toBlocking().subscribe(this)
 
         }.checkErr().onNextEvents[0]
@@ -41,39 +41,29 @@ class DoubanServiceTest {
         val auth = "Bearer ${session.accessToken}"
 
 
-        // Test getRedHeartSongs()
+        // Test getRedHeartSongIds()
         val songIds = TestSubscriber<SongS.Ids>().apply {
 
-            DoubanFM.API.getRedHeartSongs(auth)
+            DoubanFM.API.getRedHeartSongIds(auth)
                     .toBlocking().subscribe(this)
 
         }.checkErr().onNextEvents[0]
 
         Assert.assertTrue(songIds.songs.size != 0)
-        val vaildSongIds = songIds.songs.filter { id -> id.playable }
+        val idListStringBuilder = StringBuilder()
+        songIds.songs.filter { id -> id.playable }.forEach { idListStringBuilder.append(it.sid).append("|") }
+        val idListStr = idListStringBuilder.deleteCharAt(idListStringBuilder.length - 1).toString()
 
 
-        // Test registerDevice()
-        val clientId = TestSubscriber<ClientId>().apply {
+        // Test getSongs()
+        val songs = TestSubscriber<ArrayList<SongS.Song>>().apply {
 
-            DoubanPush.API.registerDevice()
+            DoubanFM.API.getSongs(auth, idListStr)
                     .toBlocking().subscribe(this)
 
         }.checkErr().onNextEvents[0]
 
-        Assert.assertTrue(!clientId.id.isNullOrBlank())
-
-
-        // FIXME
-        // Test getSong()
-//        val song = TestSubscriber<SongS.Song>().apply {
-//
-//            DoubanFM.API.getSong(auth, vaildSongIds[0].sid)
-//                    .toBlocking().subscribe(this)
-//
-//        }.checkErr().onNextEvents[0]
-//
-//        Assert.assertTrue(!song.id.isNullOrBlank())
+        Assert.assertTrue(songs.size != 0)
     }
 
     fun <T> TestSubscriber<T>.checkErr(): TestSubscriber<T> {

@@ -25,7 +25,7 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile kotlib
     compile project(":data")
-    compile "com.github.nekocode:kotgo:1.1.1"
+    compile "com.github.nekocode:kotgo:1.2"
 
     // Android support library
     compile "com.android.support:appcompat-v7:$supportLibVersion"

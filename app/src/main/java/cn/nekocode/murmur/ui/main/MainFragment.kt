@@ -113,8 +113,9 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         }
     }
 
-    override fun onDestroy() {
+    override fun onBackPressed(): Boolean {
         presenter.stopAll()
+        return super.onBackPressed()
     }
 
     override fun showLoginDialog() {

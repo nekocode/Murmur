@@ -2,14 +2,17 @@ package cn.nekocode.murmur.ui.main
 
 import android.app.Activity
 import android.os.Bundle
+import android.os.Parcelable
 import cn.nekocode.kotgo.component.rx.RxBus
 import cn.nekocode.kotgo.component.rx.bindLifecycle
 import cn.nekocode.kotgo.component.rx.onUI
 import cn.nekocode.kotgo.component.ui.BasePresenter
-import cn.nekocode.murmur.data.DO.douban.SongS
-import cn.nekocode.murmur.data.DO.douban.User
 import cn.nekocode.murmur.data.DO.Murmur
+import cn.nekocode.murmur.data.DO.MurmurParcel
+import cn.nekocode.murmur.data.DO.douban.Session
+import cn.nekocode.murmur.data.DO.douban.SessionParcel
 import cn.nekocode.murmur.data.DO.douban.SongParcel
+import cn.nekocode.murmur.data.DO.douban.SongS
 import cn.nekocode.murmur.data.exception.DoubanException
 import cn.nekocode.murmur.data.repo.DoubanRepo
 import cn.nekocode.murmur.data.repo.MurmurRepo
@@ -20,13 +23,14 @@ import rx.Observable
 import java.util.*
 
 
-class MainPresenter(): BasePresenter(), Contract.Presenter {
+class MainPresenter() : BasePresenter(), Contract.Presenter {
     var view: Contract.View? = null
 
-    var user: User? = null
+    var session: Session? = null
     val murmurs = ArrayList<Murmur>()
     val playingMurmurs = ArrayList<Murmur>()
     var playingSong: SongS.Song? = null
+    var timingTextTask: TimingTextTask? = null
 
     override fun onAttach(activity: Activity?) {
         super.onAttach(activity)
@@ -36,18 +40,24 @@ class MainPresenter(): BasePresenter(), Contract.Presenter {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             // 恢复现场
-            user = savedInstanceState.getParcelable("user")
-            murmurs.addAll(savedInstanceState.getParcelableArrayList("murmurs"))
-            playingMurmurs.addAll(savedInstanceState.getParcelableArrayList("playingMurmurs"))
+            session = savedInstanceState.getParcelable<SessionParcel>("session").data
+            murmurs.addAll(
+                    savedInstanceState.getParcelableArrayList<MurmurParcel>("murmurs")
+                            .map { it.data }
+            )
+            playingMurmurs.addAll(
+                    savedInstanceState.getParcelableArrayList<MurmurParcel>("playingMurmurs")
+                            .map { it.data }
+            )
             playingSong = savedInstanceState.getParcelable<SongParcel>("playingSong").data
 
         } else {
 
             // 检查是否已经登录
             val cachedUser = DoubanRepo.getCachedUserInfo()
-            if(cachedUser == null) {
+            if (cachedUser == null) {
                 view?.showLoginDialog()
             } else {
                 login(cachedUser.first, cachedUser.second)
@@ -58,17 +68,17 @@ class MainPresenter(): BasePresenter(), Contract.Presenter {
         // 订阅播放结束事件
         // TODO: 16/4/11 控制播放循环
         RxBus.subscribe(String::class.java) {
-            if(it.equals("Finished")) {
+            if (it.equals("Finished")) {
 
             }
         }
 
         // 异步获取歌曲剩余时间
-        TimedTextTask.start(view)
+        timingTextTask = TimingTextTask(view).apply { execute() }
     }
 
     override fun onVewCreated(savedInstanceState: Bundle?) {
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             // 恢复现场
             this.view?.onMurmursChanged(murmurs, playingMurmurs)
             this.view?.onSongChanged(playingSong!!)
@@ -80,9 +90,15 @@ class MainPresenter(): BasePresenter(), Contract.Presenter {
      * 保存现场
      */
     override fun onSaveInstanceState(outState: Bundle?) {
-        outState?.putParcelable("user", user)
-        outState?.putParcelableArrayList("murmurs", murmurs)
-        outState?.putParcelableArrayList("playingMurmurs", playingMurmurs)
+        outState?.putParcelable("session", SessionParcel(session))
+        outState?.putParcelableArrayList(
+                "murmurs",
+                murmurs.map { MurmurParcel(it) } as ArrayList<out Parcelable>
+        )
+        outState?.putParcelableArrayList(
+                "playingMurmurs",
+                playingMurmurs.map { MurmurParcel(it) } as ArrayList<out Parcelable>
+        )
         outState?.putParcelable("playingSong", SongParcel(playingSong))
 
         super.onSaveInstanceState(outState)
@@ -90,7 +106,7 @@ class MainPresenter(): BasePresenter(), Contract.Presenter {
 
     override fun onDestroyView() {
         // 终止获取歌曲剩余时间的任务
-        TimedTextTask.interrupt()
+        timingTextTask?.cancel(true)
         super.onDestroyView()
     }
 
@@ -107,15 +123,15 @@ class MainPresenter(): BasePresenter(), Contract.Presenter {
      */
     override fun login(email: String, pwd: String) {
         DoubanRepo.login(email, pwd).onUI().bindLifecycle(this).subscribe({
-            user = it
+            session = it
             view?.onLoginSuccess()
             fetchData()
 
         }, {
-            when(it) {
+            when (it) {
                 is DoubanException -> view?.showToast(it.err)
                 else -> {
-                    if(it.message != null)
+                    if (it.message != null)
                         view?.showToast(it.message!!)
                 }
             }
@@ -128,7 +144,7 @@ class MainPresenter(): BasePresenter(), Contract.Presenter {
      * 获取歌曲和白噪音
      */
     private fun fetchData() {
-        Observable.combineLatest(MurmurRepo.getMurmurs(), DoubanRepo.nextSong(user!!), {
+        Observable.combineLatest(MurmurRepo.getMurmurs(), DoubanRepo.nextSong(session!!), {
             murmurs, song ->
             Pair(murmurs, song)
 
@@ -136,7 +152,7 @@ class MainPresenter(): BasePresenter(), Contract.Presenter {
             murmurs.addAll(it.first)
 
             val selectedMurmurs = SettingRepo.loadSelectedMurmursIDs()
-            if(selectedMurmurs == null) {
+            if (selectedMurmurs == null) {
                 // 随机选择两个白噪音
                 playingMurmurs.addAll(murmurs.randomPick(2))
                 SettingRepo.saveSelectedMurmursIDs(playingMurmurs.map { it.id })
@@ -160,12 +176,12 @@ class MainPresenter(): BasePresenter(), Contract.Presenter {
      * 切换白噪音
      */
     override fun changeMurmur(murmur: Murmur, play: Boolean) {
-        if(murmur in playingMurmurs) {
-            if(!play) {
+        if (murmur in playingMurmurs) {
+            if (!play) {
                 playingMurmurs.remove(murmur)
             }
         } else {
-            if(play) {
+            if (play) {
                 playingMurmurs.add(murmur)
             }
         }
@@ -182,7 +198,7 @@ class MainPresenter(): BasePresenter(), Contract.Presenter {
      * 切换歌曲
      */
     override fun nextSong() {
-        DoubanRepo.nextSong(user!!).onUI().bindLifecycle(this).subscribe({
+        DoubanRepo.nextSong(session!!).onUI().bindLifecycle(this).subscribe({
             playingSong = it
             MusicService.instance?.playSong(playingSong!!)
             view?.onSongChanged(playingSong!!)
@@ -192,8 +208,8 @@ class MainPresenter(): BasePresenter(), Contract.Presenter {
     /**
      * 通用错误处理
      */
-    val errorHandler: (Throwable)->Unit = {
-        when(it) {
+    val errorHandler: (Throwable) -> Unit = {
+        when (it) {
             is DoubanException -> {
                 if (it.err.equals("invalid_token")) {
                     view?.showToast("You token has been invalid.\nYou must login again.")
@@ -205,7 +221,7 @@ class MainPresenter(): BasePresenter(), Contract.Presenter {
             }
 
             else -> {
-                if(it.message != null)
+                if (it.message != null)
                     view?.showToast(it.message!!)
             }
         }

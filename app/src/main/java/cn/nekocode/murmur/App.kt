@@ -6,24 +6,23 @@ import android.content.Context
 import android.content.ServiceConnection
 import android.os.IBinder
 import cn.nekocode.murmur.data.DataLayer
-import cn.nekocode.murmur.data.push.DoubanMqtt
 import cn.nekocode.murmur.service.MusicService
 import com.squareup.leakcanary.LeakCanary
 import org.jetbrains.anko.intentFor
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig
 
-class App: Application() {
+class App : Application() {
     companion object {
         lateinit var instance: App
     }
 
-    val connection = object: ServiceConnection {
+    val connection = object : ServiceConnection {
         override fun onServiceDisconnected(p0: ComponentName?) {
             MusicService.instance = null
         }
 
         override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
-            if(p1 is MusicService.MusicServiceBinder) {
+            if (p1 is MusicService.MusicServiceBinder) {
                 MusicService.instance = p1.service
             }
         }
@@ -44,8 +43,6 @@ class App: Application() {
         LeakCanary.install(this)
         DataLayer.hook(this)
         bindService()
-
-        DoubanMqtt(this).connect()
 
         CalligraphyConfig.initDefault(
                 CalligraphyConfig.Builder()
