@@ -21,6 +21,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
+/**
+ * @author nekocode (nekocode.cn@gmail.com)
+ */
 public class ImageUtil {
 
     // 将Bitmap转换成InputStream

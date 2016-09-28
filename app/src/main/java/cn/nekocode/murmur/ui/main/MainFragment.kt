@@ -34,6 +34,9 @@ import org.jetbrains.anko.*
 import qiu.niorgai.StatusBarCompat
 import kotlin.properties.Delegates
 
+/**
+ * @author nekocode (nekocode.cn@gmail.com)
+ */
 class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
     companion object {
         const val TAG = "MainFragment"
@@ -43,7 +46,6 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         }
     }
 
-    override val layoutId: Int = R.layout.fragment_main
     lateinit var presenter: MainPresenter
 
     val ANIMATION_DURATION = 800L
@@ -61,11 +63,16 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
         }
     }
 
+    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater?.inflate(R.layout.fragment_main, container, false)
+    }
+
+    override fun onCreatePresenter(presenterFactory: PresenterFactory) {
+        presenter = presenterFactory.create(MainPresenter::class.java)
+    }
+
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // 绑定 Presenter
-        presenter = bindPresenter<MainPresenter>()
 
         // 初始化渲染器
         surfaceView.apply {
@@ -221,7 +228,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
             backgroundColorAnimator = createColorAnimator(oldBackgroundColor, swatch.rgb) {
                 val color = it.animatedValue as Int
 
-                backgroundView.backgroundColor = color
+                backgroundView?.backgroundColor = color
                 renderer.setBackColor(color)
                 if(activity?.window != null) {
                     StatusBarCompat.setStatusBarColor(activity, color)
@@ -235,11 +242,11 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
             textColorAnimator = createColorAnimator(oldTextColor, swatch.titleTextColor) {
                 val color = it.animatedValue as Int
 
-                titleTextView.textColor = color
-                performerTextView.textColor = color
-                murmursTextView.textColor = color
-                timeTextView.textColor = color
-                progressWheel.barColor = color
+                titleTextView?.textColor = color
+                performerTextView?.textColor = color
+                murmursTextView?.textColor = color
+                timeTextView?.textColor = color
+                progressWheel?.barColor = color
 
                 oldTextColor = color
             }
@@ -257,7 +264,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
 
             override fun onAnimationEnd(animation: Animator?) {
                 isPaletteChanging = false
-                progressWheel.visibility = View.INVISIBLE
+                progressWheel?.visibility = View.INVISIBLE
             }
 
             override fun onAnimationCancel(animation: Animator?) {

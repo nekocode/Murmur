@@ -8,7 +8,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:2.2.0'
 
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
     }
 }
 
@@ -19,8 +19,4 @@ allprojects {
             url "https://jitpack.io"
         }
     }
-}
-
-ext {
-    kotlib = "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 }

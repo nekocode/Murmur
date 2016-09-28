@@ -8,7 +8,7 @@ import retrofit2.http.Query
 import rx.Observable
 
 /**
- * Created by nekocode on 16/9/14.
+ * @author nekocode (nekocode.cn@gmail.com)
  */
 internal interface Leancloud {
     companion object {

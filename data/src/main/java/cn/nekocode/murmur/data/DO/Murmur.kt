@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 import nz.bradcampbell.paperparcel.PaperParcel
 
 /**
- * Created by nekocode on 3/13/16.
+ * @author nekocode (nekocode.cn@gmail.com)
  */
 @PaperParcel
 class Murmur(

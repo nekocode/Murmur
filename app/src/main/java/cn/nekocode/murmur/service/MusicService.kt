@@ -10,7 +10,7 @@ import cn.nekocode.murmur.data.DO.douban.SongS
 import cn.nekocode.murmur.data.DO.Murmur
 
 /**
- * Created by nekocode on 3/15/16.
+ * @author nekocode (nekocode.cn@gmail.com)
  */
 class MusicService: Service() {
     companion object {

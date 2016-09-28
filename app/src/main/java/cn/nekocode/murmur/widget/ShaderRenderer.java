@@ -12,6 +12,9 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+/**
+ * @author nekocode (nekocode.cn@gmail.com)
+ */
 public class ShaderRenderer implements GLSurfaceView.Renderer {
     final String vshader =
             "attribute vec4 vPosition;" +

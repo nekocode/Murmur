@@ -8,7 +8,7 @@ import rx.Observable
 import rx.schedulers.Schedulers
 
 /**
- * Created by nekocode on 3/13/16.
+ * @author nekocode (nekocode.cn@gmail.com)
  */
 object MurmurRepo {
 

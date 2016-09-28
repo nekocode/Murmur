@@ -10,7 +10,7 @@ import rx.schedulers.Schedulers
 import java.util.*
 
 /**
- * Created by nekocode on 3/13/16.
+ * @author nekocode (nekocode.cn@gmail.com)
  */
 object DoubanRepo {
 

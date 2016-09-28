@@ -3,7 +3,7 @@ package cn.nekocode.murmur.data.repo
 import com.orhanobut.hawk.Hawk
 
 /**
- * Created by nekocode on 16/3/22.
+ * @author nekocode (nekocode.cn@gmail.com)
  */
 object SettingRepo {
 

@@ -6,7 +6,7 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 
 /**
- * Created by nekocode on 16/9/16.
+ * @author nekocode (nekocode.cn@gmail.com)
  */
 class TimingTextTask : AsyncTask<Unit, String, Unit> {
     var view: Contract.View? = null

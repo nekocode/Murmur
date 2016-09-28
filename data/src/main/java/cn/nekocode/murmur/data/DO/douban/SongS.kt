@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 import nz.bradcampbell.paperparcel.PaperParcel
 
 /**
- * Created by nekocode on 3/15/16.
+ * @author nekocode (nekocode.cn@gmail.com)
  */
 object SongS {
     internal class Ids(

@@ -5,7 +5,9 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
-
+/**
+ * @author nekocode (nekocode.cn@gmail.com)
+ */
 internal object LeancloudService {
     const val API_HOST_URL = "https://api.leancloud.cn/1.1/"
     const val APP_ID = "njtyqtww55i0fikg9zgzuq5cayrbi7u85uiolfjoadch2pse"

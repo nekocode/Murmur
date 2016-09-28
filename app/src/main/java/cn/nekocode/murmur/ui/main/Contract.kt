@@ -4,7 +4,7 @@ import cn.nekocode.murmur.data.DO.douban.SongS
 import cn.nekocode.murmur.data.DO.Murmur
 
 /**
- * Created by nekocode on 16/4/9.
+ * @author nekocode (nekocode.cn@gmail.com)
  */
 interface Contract {
     interface View {

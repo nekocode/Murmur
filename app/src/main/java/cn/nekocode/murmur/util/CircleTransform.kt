@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import com.squareup.picasso.Transformation
 
 /**
- * Created by nekocode on 3/15/16.
+ * @author nekocode (nekocode.cn@gmail.com)
  */
 class CircleTransform: Transformation {
     override fun transform(source: Bitmap): Bitmap {

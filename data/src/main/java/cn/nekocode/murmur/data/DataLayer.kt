@@ -10,6 +10,9 @@ import okhttp3.OkHttpClient
 import java.io.File
 import java.util.concurrent.TimeUnit
 
+/**
+ * @author nekocode (nekocode.cn@gmail.com)
+ */
 object DataLayer {
     // OkHttp Config
     const val RESPONSE_CACHE_FILE: String = "reponse_cache"

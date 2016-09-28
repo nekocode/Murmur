@@ -1,6 +1,5 @@
 package cn.nekocode.murmur.ui.main
 
-import android.app.Activity
 import android.os.Bundle
 import android.os.Parcelable
 import cn.nekocode.kotgo.component.rx.RxBus
@@ -22,7 +21,9 @@ import cn.nekocode.murmur.util.Util.randomPick
 import rx.Observable
 import java.util.*
 
-
+/**
+ * @author nekocode (nekocode.cn@gmail.com)
+ */
 class MainPresenter() : BasePresenter(), Contract.Presenter {
     var view: Contract.View? = null
 
@@ -31,11 +32,6 @@ class MainPresenter() : BasePresenter(), Contract.Presenter {
     val playingMurmurs = ArrayList<Murmur>()
     var playingSong: SongS.Song? = null
     var timingTextTask: TimingTextTask? = null
-
-    override fun onAttach(activity: Activity?) {
-        super.onAttach(activity)
-        view = getParent() as Contract.View
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,18 +68,20 @@ class MainPresenter() : BasePresenter(), Contract.Presenter {
 
             }
         }
-
-        // 异步获取歌曲剩余时间
-        timingTextTask = TimingTextTask(view).apply { execute() }
     }
 
-    override fun onVewCreated(savedInstanceState: Bundle?) {
+    override fun onViewCreated(viewOfContract: Any, savedInstanceState: Bundle?) {
+        view = viewOfContract as Contract.View
+
         if (savedInstanceState != null) {
             // 恢复现场
             this.view?.onMurmursChanged(murmurs, playingMurmurs)
             this.view?.onSongChanged(playingSong!!)
 
         }
+
+        // 异步获取歌曲剩余时间
+        timingTextTask = TimingTextTask(view).apply { execute() }
     }
 
     /**

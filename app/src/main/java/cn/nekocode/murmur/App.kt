@@ -11,6 +11,9 @@ import com.squareup.leakcanary.LeakCanary
 import org.jetbrains.anko.intentFor
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig
 
+/**
+ * @author nekocode (nekocode.cn@gmail.com)
+ */
 class App : Application() {
     companion object {
         lateinit var instance: App

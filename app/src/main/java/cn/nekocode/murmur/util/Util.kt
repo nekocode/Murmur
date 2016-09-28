@@ -3,7 +3,7 @@ package cn.nekocode.murmur.util
 import java.util.*
 
 /**
- * Created by nekocode on 3/13/16.
+ * @author nekocode (nekocode.cn@gmail.com)
  */
 object Util {
 

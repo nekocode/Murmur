@@ -5,7 +5,9 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
-
+/**
+ * @author nekocode (nekocode.cn@gmail.com)
+ */
 internal object DoubanService {
     const val API_HOST_URL = "https://api.douban.com"
     const val TOKEN_HOST_URL = "https://www.douban.com"

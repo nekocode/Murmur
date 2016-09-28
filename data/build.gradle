@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 17
         targetSdkVersion 24
-        versionCode 127
-        versionName projectVersion
+        versionCode PROJECT_VERSION_CODE.toInteger()
+        versionName PROJECT_VERSION_NAME
     }
     buildTypes {
         release {
@@ -27,7 +27,8 @@ dependencies {
     testCompile 'junit:junit:4.12'
     testCompile "org.robolectric:robolectric:3.1.2"
 
-    compile "com.android.support:support-v4:$supportLibVersion"
+    // Android support libraries
+    compile "com.android.support:support-annotations:$SUPPORT_LIBS_VERSION"
 
     // Retrofit
     compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
@@ -45,5 +46,5 @@ dependencies {
     compile "com.github.grandstaish.paperparcel:paperparcel-kotlin:$paperparcelVersion"
     kapt "com.github.grandstaish.paperparcel:compiler:$paperparcelVersion"
 
-    compile kotlib
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
 }
