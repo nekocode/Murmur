@@ -14,7 +14,7 @@ Murmur 采用 Kotlin / MVP / ReactiveX 进行构建，它是 **[Kotgo](https://g
 程式中的 Shader 特效本人修改自 [Shadertoy](https://www.shadertoy.com/view/XsfGRn)。
 
 ## 程式主体
-你可以在 [这里](https://github.com/nekocode/murmur/releases/download/0.4.1/Murmur.apk) 下载到它。
+你可以在 [这里](https://github.com/nekocode/murmur/releases/download/0.4.2/Murmur.apk) 下载到它。
 
 #### 操作说明
 - 您需要使用豆瓣帐号进行登录
