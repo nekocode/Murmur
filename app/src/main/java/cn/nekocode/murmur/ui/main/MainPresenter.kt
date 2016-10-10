@@ -24,7 +24,7 @@ import java.util.*
 /**
  * @author nekocode (nekocode.cn@gmail.com)
  */
-class MainPresenter() : BasePresenter(), Contract.Presenter {
+class MainPresenter() : BasePresenter<Contract.View>(), Contract.Presenter {
     var view: Contract.View? = null
 
     var session: Session? = null
@@ -49,16 +49,6 @@ class MainPresenter() : BasePresenter(), Contract.Presenter {
             )
             playingSong = savedInstanceState.getParcelable<SongParcel>("playingSong").data
 
-        } else {
-
-            // 检查是否已经登录
-            val cachedUser = DoubanRepo.getCachedUserInfo()
-            if (cachedUser == null) {
-                view?.showLoginDialog()
-            } else {
-                login(cachedUser.first, cachedUser.second)
-            }
-
         }
 
         // 订阅播放结束事件
@@ -70,14 +60,22 @@ class MainPresenter() : BasePresenter(), Contract.Presenter {
         }
     }
 
-    override fun onViewCreated(viewOfContract: Any, savedInstanceState: Bundle?) {
-        view = viewOfContract as Contract.View
+    override fun onViewCreated(view: Contract.View?, savedInstanceState: Bundle?) {
+        this.view = view
 
         if (savedInstanceState != null) {
             // 恢复现场
-            this.view?.onMurmursChanged(murmurs, playingMurmurs)
-            this.view?.onSongChanged(playingSong!!)
+            view?.onMurmursChanged(murmurs, playingMurmurs)
+            view?.onSongChanged(playingSong!!)
 
+        } else {
+            // 检查是否已经登录
+            val cachedUser = DoubanRepo.getCachedUserInfo()
+            if (cachedUser == null) {
+                view?.showLoginDialog()
+            } else {
+                login(cachedUser.first, cachedUser.second)
+            }
         }
 
         // 异步获取歌曲剩余时间

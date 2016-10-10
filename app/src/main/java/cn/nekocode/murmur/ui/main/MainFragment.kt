@@ -68,7 +68,7 @@ class MainFragment : BaseFragment(), Contract.View, View.OnTouchListener {
     }
 
     override fun onCreatePresenter(presenterFactory: PresenterFactory) {
-        presenter = presenterFactory.create(MainPresenter::class.java)
+        presenter = presenterFactory.createOrGet(MainPresenter::class.java)
     }
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
