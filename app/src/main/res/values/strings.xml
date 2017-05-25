@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Murmur</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="email_invaild">Your email address is invaild.</string>
+    <string name="password_invaild">Your password is invaild.</string>
+    <string name="ensure_exit">Are you want to exit?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+    <string name="menu">Menu</string>
+
+    <string name="toast_login_failed">Login failed.</string>
+</resources>

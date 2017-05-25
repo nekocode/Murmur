@@ -1,0 +1,47 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+def getLocalProperty(prop) {
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    return properties.getProperty(prop, 'TODO')
+}
+
+android {
+    compileSdkVersion(COMPILE_SDK_VERSION.toInteger())
+    buildToolsVersion(BUILD_TOOLS_VERSION)
+
+    defaultConfig {
+        minSdkVersion 17
+        targetSdkVersion 25
+
+        // 测试用的豆瓣账户密码，需要手动在 local.properties 中添加
+        buildConfigField "String", "TEST_USER", "\"${getLocalProperty("TEST_USER")}\""
+        buildConfigField "String", "TEST_PWD", "\"${getLocalProperty("TEST_PWD")}\""
+    }
+
+    publishNonDefault true
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    testCompile "org.robolectric:robolectric:3.3.2"
+
+    // Android support libraries
+    compile "com.android.support:support-annotations:$SUPPORT_LIBS_VERSION"
+
+    // Retrofit
+    def retrofitVersion = "2.3.0"
+    compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    compile "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    compile "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
+
+    // Storage library
+    compile "io.paperdb:paperdb:2.0"
+
+    // MediaPlyaer Proxy
+    compile 'com.danikula:videocache:2.7.0'
+
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
+}

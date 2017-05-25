@@ -1,0 +1,13 @@
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:screenOrientation">portrait</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+
+        <!-- Actionbar color -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <!--Status bar color-->
+        <item name="colorPrimaryDark">@color/colorPrimary</item>
+    </style>
+</resources>
