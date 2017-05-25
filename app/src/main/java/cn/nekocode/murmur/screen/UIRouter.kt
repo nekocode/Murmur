@@ -31,7 +31,7 @@ interface UIRouter {
     }
 
     @TargetClass(AboutActivity::class)
-    fun gotoPage2(context: Context?) {
-        IMPL.gotoPage2(context)
+    fun gotoAbout(context: Context?) {
+        IMPL.gotoAbout(context)
     }
 }

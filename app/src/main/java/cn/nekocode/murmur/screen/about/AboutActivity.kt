@@ -16,9 +16,13 @@
 
 package cn.nekocode.murmur.screen.about
 
+import android.os.Build
 import android.os.Bundle
+import android.text.Html
+import android.text.method.LinkMovementMethod
 import cn.nekocode.murmur.R
 import cn.nekocode.murmur.base.BaseActivity
+import kotlinx.android.synthetic.main.activity_about.*
 
 /**
  * @author nekocode (nekocode.cn@gmail.com)
@@ -33,5 +37,12 @@ class AboutActivity : BaseActivity(), Contract.View {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about)
+
+        textView.movementMethod = LinkMovementMethod.getInstance()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            textView.text = Html.fromHtml(getString(R.string.icon_credit), Html.FROM_HTML_MODE_LEGACY)
+        } else {
+            textView.text = Html.fromHtml(getString(R.string.icon_credit))
+        }
     }
 }

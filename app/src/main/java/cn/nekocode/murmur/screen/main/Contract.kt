@@ -33,6 +33,8 @@ interface Contract {
         companion object {
             const val FAB_STATUS_PAUSE = 0
             const val FAB_STATUS_RESUME = 1
+
+            const val MENU_ID_ABOUT = 0
         }
 
         fun setAdapter(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder>)
@@ -52,5 +54,6 @@ interface Contract {
         fun onToolbarClicked()
         fun onFABClicked(status: Int)
         fun onLoginClicked(email: String, pwd: String)
+        fun onMenuSelected(id: Int)
     }
 }

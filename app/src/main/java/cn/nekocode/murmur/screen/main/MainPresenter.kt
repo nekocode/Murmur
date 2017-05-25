@@ -126,6 +126,15 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter {
     }
 
     /**
+     * 选择菜单
+     */
+    override fun onMenuSelected(id: Int) {
+        when (id) {
+            Contract.View.MENU_ID_ABOUT -> gotoAbout(context())
+        }
+    }
+
+    /**
      * 展示歌曲列表
      */
     fun Observable<ArrayList<Song>>.updateView() {

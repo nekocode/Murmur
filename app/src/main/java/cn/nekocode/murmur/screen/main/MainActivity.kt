@@ -57,13 +57,14 @@ class MainActivity : BaseActivity(), Contract.View, LoginFragment.Callback {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val item = menu.add(R.string.menu)
+        val item = menu.add(Menu.NONE, Contract.View.MENU_ID_ABOUT, Menu.NONE, R.string.menu)
         item.setIcon(R.mipmap.ic_launcher)
         item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        presenter?.onMenuSelected(item.itemId)
         return super.onOptionsItemSelected(item)
     }
 
