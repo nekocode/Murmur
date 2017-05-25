@@ -6,7 +6,6 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.2'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
-
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
     }
 }
@@ -14,8 +13,20 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
-        maven {
-            url "https://jitpack.io"
+        maven { url "https://jitpack.io" }
+    }
+
+    /**
+     * Common Methods
+     */
+    ext.getLocalProperty = { prop, defaultValue = "" ->
+        def file = project.rootProject.file('local.properties')
+        if (file.exists()) {
+            Properties properties = new Properties()
+            properties.load(file.newDataInputStream())
+            return properties.getProperty(prop, defaultValue)
+        } else {
+            return defaultValue
         }
     }
 }

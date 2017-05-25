@@ -1,12 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
-def getLocalProperty(prop) {
-    Properties properties = new Properties()
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-    return properties.getProperty(prop, 'TODO')
-}
-
 android {
     compileSdkVersion(COMPILE_SDK_VERSION.toInteger())
     buildToolsVersion(BUILD_TOOLS_VERSION)
@@ -14,10 +8,18 @@ android {
     defaultConfig {
         minSdkVersion 17
         targetSdkVersion 25
+    }
 
-        // 测试用的豆瓣账户密码，需要手动在 local.properties 中添加
-        buildConfigField "String", "TEST_USER", "\"${getLocalProperty("TEST_USER")}\""
-        buildConfigField "String", "TEST_PWD", "\"${getLocalProperty("TEST_PWD")}\""
+    buildTypes {
+        debug {
+            // 测试用的豆瓣账户密码，需要手动在 local.properties 中添加
+            buildConfigField 'String', 'TEST_USER', "\"${getLocalProperty('TEST_USER', '')}\""
+            buildConfigField 'String', 'TEST_PWD', "\"${getLocalProperty('TEST_PWD', '')}\""
+        }
+        release {
+            buildConfigField 'String', 'TEST_USER', ''
+            buildConfigField 'String', 'TEST_PWD', ''
+        }
     }
 
     publishNonDefault true
@@ -38,7 +40,7 @@ dependencies {
     compile "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
 
     // Storage library
-    compile "io.paperdb:paperdb:2.0"
+    compile 'io.paperdb:paperdb:2.0'
 
     // MediaPlyaer Proxy
     compile 'com.danikula:videocache:2.7.0'
