@@ -21,15 +21,24 @@ class DoubanServiceTest {
     @Test
     fun testLogin() {
         val session = DoubanService.login(BuildConfig.TEST_USER, BuildConfig.TEST_PWD).blockingFirst()
-        print(session)
+        println(session)
         Assert.assertTrue(session != null)
+    }
+
+    @Test
+    fun testRelogin() {
+        val session = DoubanService.login(BuildConfig.TEST_USER, BuildConfig.TEST_PWD).blockingFirst()
+        println(session)
+        val newSeesion = DoubanService.relogin(session).blockingFirst()
+        println(newSeesion)
+        Assert.assertTrue(newSeesion != null)
     }
 
     @Test
     fun testGetSongs() {
         val session = DoubanService.login(BuildConfig.TEST_USER, BuildConfig.TEST_PWD).blockingFirst()
         val songs = DoubanService.getSongs(session).blockingFirst()
-        print(songs)
+        println(songs)
         Assert.assertTrue(songs.isNotEmpty())
     }
 }
