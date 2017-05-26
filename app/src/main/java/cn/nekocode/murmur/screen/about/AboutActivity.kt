@@ -38,11 +38,18 @@ class AboutActivity : BaseActivity(), Contract.View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about)
 
+        setSupportActionBar(toolbar)
         textView.movementMethod = LinkMovementMethod.getInstance()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            textView.text = Html.fromHtml(getString(R.string.icon_credit), Html.FROM_HTML_MODE_LEGACY)
-        } else {
-            textView.text = Html.fromHtml(getString(R.string.icon_credit))
+        textView.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(getString(R.string.about_description), Html.FROM_HTML_MODE_LEGACY)
+        }else {
+            Html.fromHtml(getString(R.string.about_description))
+        }
+
+        val renderer = ShaderRenderer(this, R.color.colorPrimary)
+        textureView.surfaceTextureListener = renderer
+        textureView.addOnLayoutChangeListener { _, left, top, right, bottom, _, _, _, _ ->
+            renderer.onSurfaceTextureSizeChanged(null, right - left, bottom - top)
         }
     }
 }

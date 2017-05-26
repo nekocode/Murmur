@@ -10,8 +10,11 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
 
-    <string name="icon_credit">
-        <![CDATA[<a href="http://www.freepik.com/free-photos-vectors/background">Background vector created by Freepik</a>]]>
+    <string name="about_description">
+        <![CDATA[Murmur is an open source application.
+        <br>The source code in on <a href="https://github.com/nekocode/Murmur">Github</a>.
+        <br>
+        <br>Icon created by <a href="http://www.freepik.com/free-photos-vectors/background">Freepik</a>]]>
     </string>
 
     <string name="menu">Menu</string>

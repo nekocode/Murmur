@@ -28,7 +28,8 @@ import cn.nekocode.murmur.data.service.DoubanService
 import cn.nekocode.murmur.item.SongItem
 import com.evernote.android.state.State
 import com.evernote.android.state.StateSaver
-import com.trello.rxlifecycle2.kotlin.bindToLifecycle
+import com.trello.rxlifecycle2.android.FragmentEvent
+import com.trello.rxlifecycle2.kotlin.bindUntilEvent
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -84,6 +85,7 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter {
                     // 刷新 Token
                     DoubanService.relogin(session!!)
                             .subscribeOn(Schedulers.io())
+                            .bindUntilEvent(this@MainPresenter, FragmentEvent.DESTROY_VIEW)
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe({
                                 // TODO progress
@@ -117,6 +119,7 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter {
         // TODO progress
         DoubanService.login(email, pwd)
                 .subscribeOn(Schedulers.io())
+                .bindUntilEvent(this@MainPresenter, FragmentEvent.DESTROY_VIEW)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     session = it
@@ -145,7 +148,7 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter {
                     songs = list
                     list.map { SongItem.VO.fromSong(it) }
                 }
-                .bindToLifecycle(this@MainPresenter)
+                .bindUntilEvent(this@MainPresenter, FragmentEvent.DESTROY_VIEW)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     itemPool.clear()
