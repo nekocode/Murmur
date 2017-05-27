@@ -43,6 +43,8 @@ interface Contract {
         fun showToobar(show: Boolean)
         fun scrollToPosition(position: Int)
         fun setFABStatus(status: Int)
+        fun showLoginDialog()
+        fun hideLoginDialog()
     }
 
     /**

@@ -24,8 +24,8 @@ import android.view.Menu
 import android.view.MenuItem
 import cn.nekocode.murmur.R
 import cn.nekocode.murmur.base.BaseActivity
-import com.evernote.android.state.State
-import com.evernote.android.state.StateSaver
+import com.github.yamamotoj.pikkel.Pikkel
+import com.github.yamamotoj.pikkel.PikkelDelegate
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.onClick
@@ -33,16 +33,20 @@ import org.jetbrains.anko.onClick
 /**
  * @author nekocode (nekocode.cn@gmail.com)
  */
-class MainActivity : BaseActivity(), Contract.View, LoginFragment.Callback {
-    @State
-    var fabStatus = Contract.View.FAB_STATUS_RESUME
+class MainActivity : BaseActivity(), Contract.View, LoginFragment.Callback, Pikkel by PikkelDelegate() {
+    companion object {
+        const val TAG_LOGIN_FRG = "login"
+    }
+
+    var fabStatus by state(Contract.View.FAB_STATUS_RESUME)
+    var loginFrg: LoginFragment? = null
 
     var presenter: Contract.Presenter? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        StateSaver.restoreInstanceState(this, savedInstanceState)
+        restoreInstanceState(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         setSupportActionBar(toolbar)
@@ -50,6 +54,8 @@ class MainActivity : BaseActivity(), Contract.View, LoginFragment.Callback {
         setFABStatus(fabStatus)
         resumeOrPauseButton.onClick { presenter?.onFABClicked(fabStatus) }
         recyclerView.layoutManager = LinearLayoutManager(this)
+
+        loginFrg = fragmentManager.findFragmentByTag(TAG_LOGIN_FRG) as LoginFragment?
     }
 
     override fun onCreatePresenter(presenterFactory: PresenterFactory) {
@@ -106,7 +112,7 @@ class MainActivity : BaseActivity(), Contract.View, LoginFragment.Callback {
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-        StateSaver.saveInstanceState(this, outState ?: return)
+        saveInstanceState(outState ?: return)
     }
 
     override fun onBackPressed() {
@@ -119,6 +125,17 @@ class MainActivity : BaseActivity(), Contract.View, LoginFragment.Callback {
                 super.onBackPressed()
             }
         }.show()
+    }
+
+    override fun showLoginDialog() {
+        if (loginFrg == null) {
+            loginFrg = LoginFragment()
+            loginFrg?.show(fragmentManager, TAG_LOGIN_FRG)
+        }
+    }
+
+    override fun hideLoginDialog() {
+        loginFrg?.dismiss()
     }
 
     override fun onLoginClicked(email: String, pwd: String) {

@@ -17,6 +17,7 @@
 package cn.nekocode.murmur.base
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -26,23 +27,38 @@ import com.trello.rxlifecycle2.components.RxFragment
 /**
  * @author nekocode (nekocode.cn@gmail.com)
  */
-abstract class BasePresenter<V> : RxFragment(), IContext {
-    var view: V? = null
+abstract class BasePresenter<V> : RxFragment(), IContextProvider {
+    private var view: V? = null
 
 
-    override fun context(): Context? = activity
+    abstract fun onViewCreated(view: V, savedInstanceState: Bundle?)
 
     final override fun onCreateView(
             inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
-        view = activity as V?
+        val view = view ?: return null
         onViewCreated(view, savedInstanceState)
         return null
     }
 
-    abstract fun onViewCreated(view: V?, savedInstanceState: Bundle?)
-
+    /**
+     * Headless-fragment will not call this method
+     */
     final override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
     }
+
+    override fun onDestroyView() {
+        view = null
+        super.onDestroyView()
+    }
+
+    override fun getContext(): Context =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) super.getContext() else activity
+
+    fun setView(view: Any) {
+        this.view = view as V
+    }
+
+    fun view(): V? = view
 }

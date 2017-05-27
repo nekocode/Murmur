@@ -26,8 +26,8 @@ import cn.nekocode.murmur.data.DO.douban.Session
 import cn.nekocode.murmur.data.DO.douban.Song
 import cn.nekocode.murmur.data.service.DoubanService
 import cn.nekocode.murmur.item.SongItem
-import com.evernote.android.state.State
-import com.evernote.android.state.StateSaver
+import com.github.yamamotoj.pikkel.Pikkel
+import com.github.yamamotoj.pikkel.PikkelDelegate
 import com.trello.rxlifecycle2.android.FragmentEvent
 import com.trello.rxlifecycle2.kotlin.bindUntilEvent
 import io.reactivex.Observable
@@ -38,28 +38,18 @@ import java.util.*
 /**
  * @author nekocode (nekocode.cn@gmail.com)
  */
-class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter {
-    companion object {
-        const val TAG_LOGIN_FRG = "login"
-    }
-
-    @State
-    var session: Session? = null
-    @State
-    var songs: ArrayList<Song>? = null
-    @State
-    var playingPosition = -1
-
+class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter, Pikkel by PikkelDelegate() {
+    var session by state<Session?>(null)
+    var songs by state<ArrayList<Song>?>(null)
+    var playingPosition by state(-1)
     var itemPool = ItemPool()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        StateSaver.restoreInstanceState(this, savedInstanceState)
+        restoreInstanceState(savedInstanceState)
         itemPool.addType(SongItem::class.java)
-    }
 
-    override fun onViewCreated(view: Contract.View?, savedInstanceState: Bundle?) {
         // 监听点击
         itemPool.onEvent(SongItem::class.java) { event ->
             when (event.action) {
@@ -69,36 +59,37 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter {
                 }
             }
         }
+    }
 
+    override fun onViewCreated(view: Contract.View, savedInstanceState: Bundle?) {
         // 更新标题栏
         updateTitles(songs?.getOrNull(playingPosition))
 
-        // 检查是否需要登录
-        if (session == null) {
-            val loginFrg = fragmentManager.findFragmentByTag(TAG_LOGIN_FRG)
-            if (loginFrg == null) {
-                session = DoubanService.getSavedSession()
+        // 获取歌曲
+        if (songs != null) {
+            // 已经获取过数据
+            Observable.just(songs!!)
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .setSongsToView()
 
-                if (session == null) {
-                    LoginFragment().show(fragmentManager, TAG_LOGIN_FRG)
-                } else {
-                    // 刷新 Token
-                    DoubanService.relogin(session!!)
-                            .subscribeOn(Schedulers.io())
-                            .bindUntilEvent(this@MainPresenter, FragmentEvent.DESTROY_VIEW)
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe({
-                                // TODO progress
-                                session = it
-                                DoubanService.getSongs(it).updateView()
-
-                            }, this::onLoginError)
-                }
-            }
         } else {
-            // 屏幕旋转
-            songs?.let {
-                Observable.just(it).updateView()
+            session = DoubanService.getSavedSession()
+
+            // 检查是否需要登陆
+            if (session == null) {
+                view.showLoginDialog()
+            } else {
+                // 刷新 Token
+                DoubanService.relogin(session ?: return)
+                        .subscribeOn(Schedulers.io())
+                        .bindUntilEvent(this@MainPresenter, FragmentEvent.DESTROY_VIEW)
+                        .subscribe({
+                            session = it
+                            DoubanService.getSongs(it)
+                                    .subscribeOn(Schedulers.io())
+                                    .setSongsToView()
+
+                        }, this::onLoginError)
             }
         }
     }
@@ -107,9 +98,8 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter {
      * 登录错误时，重新展示对话框
      */
     fun onLoginError(ignored: Throwable) {
-        val view = view ?: return
-        view.toast(getString(R.string.toast_login_failed))
-        LoginFragment().show(fragmentManager, TAG_LOGIN_FRG)
+        view()?.toast(getString(R.string.toast_login_failed))
+        view()?.showLoginDialog()
     }
 
     /**
@@ -123,7 +113,9 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     session = it
-                    DoubanService.getSongs(it).updateView()
+                    DoubanService.getSongs(it)
+                            .subscribeOn(Schedulers.io())
+                            .setSongsToView()
 
                 }, this::onLoginError)
     }
@@ -133,16 +125,15 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter {
      */
     override fun onMenuSelected(id: Int) {
         when (id) {
-            Contract.View.MENU_ID_ABOUT -> gotoAbout(context())
+            Contract.View.MENU_ID_ABOUT -> gotoAbout(context)
         }
     }
 
     /**
      * 展示歌曲列表
      */
-    fun Observable<ArrayList<Song>>.updateView() {
+    fun Observable<ArrayList<Song>>.setSongsToView() {
         this
-                .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .map { list ->
                     songs = list
@@ -153,7 +144,7 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter {
                 .subscribe({
                     itemPool.clear()
                     itemPool.addAll(it)
-                    view?.setAdapter(itemPool.adapter)
+                    view()?.setAdapter(itemPool.adapter)
                 }, this@MainPresenter::onError)
     }
 
@@ -171,7 +162,7 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter {
         /*
           对 View 的操作
          */
-        val view = view ?: return
+        val view = view() ?: return
         if (song != null) {
             view.showToobar(true)
             updateTitles(song)
@@ -194,7 +185,7 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter {
         /*
           对 View 的操作
          */
-        val view = view ?: return
+        val view = view() ?: return
         view.setFABStatus(Contract.View.FAB_STATUS_RESUME)
     }
 
@@ -202,7 +193,7 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter {
      * 设置 Toolbar 的标题
      */
     fun updateTitles(song: Song?) {
-        val view = view ?: return
+        val view = view() ?: return
         if (song != null) {
             view.setToolbarTitle(song.title)
             view.setToolbarSubtitle(song.artist)
@@ -217,7 +208,7 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter {
      */
     override fun onToolbarClicked() {
         if (playingPosition != -1) {
-            view?.scrollToPosition(playingPosition)
+            view()?.scrollToPosition(playingPosition)
         }
     }
 
@@ -243,7 +234,7 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter {
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-        StateSaver.saveInstanceState(this, outState ?: return)
+        saveInstanceState(outState ?: return)
     }
 
     override fun onBackPressed() {

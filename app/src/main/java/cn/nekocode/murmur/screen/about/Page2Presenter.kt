@@ -24,6 +24,6 @@ import cn.nekocode.murmur.base.BasePresenter
  */
 class Page2Presenter : BasePresenter<Contract.View>(), Contract.Presenter {
 
-    override fun onViewCreated(view: Contract.View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: Contract.View, savedInstanceState: Bundle?) {
     }
 }

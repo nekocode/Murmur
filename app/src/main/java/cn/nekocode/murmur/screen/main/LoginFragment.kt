@@ -29,18 +29,16 @@ import android.view.KeyEvent
 import android.widget.EditText
 import cn.nekocode.murmur.BuildConfig
 import cn.nekocode.murmur.R
-import com.evernote.android.state.State
-import com.evernote.android.state.StateSaver
+import com.github.yamamotoj.pikkel.Pikkel
+import com.github.yamamotoj.pikkel.PikkelDelegate
 import org.jetbrains.anko.*
 
 /**
  * @author nekocode (nekocode.cn@gmail.com)
  */
-class LoginFragment : DialogFragment() {
-    @State
-    var emailText: String? = null
-    @State
-    var pwdText: String? = null
+class LoginFragment : DialogFragment(), Pikkel by PikkelDelegate() {
+    var emailText by state<String?>(null)
+    var pwdText by state<String?>(null)
     var emailEdit: EditText? = null
     var pwdEdit: EditText? = null
     var callback: Callback? = null
@@ -69,7 +67,7 @@ class LoginFragment : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        StateSaver.restoreInstanceState(this, savedInstanceState)
+        restoreInstanceState(savedInstanceState)
         isCancelable = false
 
         val dialog = AlertDialog.Builder(activity).apply {
@@ -155,7 +153,7 @@ class LoginFragment : DialogFragment() {
 
         emailText = emailEdit?.text?.toString() ?: ""
         pwdText = pwdEdit?.text?.toString() ?: ""
-        StateSaver.saveInstanceState(this, outState)
+        saveInstanceState(outState)
     }
 
     interface Callback {

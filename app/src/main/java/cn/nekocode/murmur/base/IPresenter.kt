@@ -22,9 +22,9 @@ import org.jetbrains.anko.toast
 /**
  * @author nekocode (nekocode.cn@gmail.com)
  */
-interface IPresenter : IContext, UIRouter {
+interface IPresenter : IContextProvider, UIRouter {
 
     fun onError(err: Throwable) {
-        context()?.toast(err.message ?: "Unkown Error")
+        getContext()?.toast(err.message ?: "Unkown Error")
     }
 }
