@@ -130,8 +130,9 @@ class MainActivity : BaseActivity(), Contract.View, LoginFragment.Callback, Pikk
     override fun showLoginDialog() {
         if (loginFrg == null) {
             loginFrg = LoginFragment()
-            loginFrg?.show(fragmentManager, TAG_LOGIN_FRG)
         }
+
+        loginFrg?.show(fragmentManager, TAG_LOGIN_FRG)
     }
 
     override fun hideLoginDialog() {
