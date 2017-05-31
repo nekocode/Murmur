@@ -26,6 +26,7 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.util.Patterns
 import android.view.KeyEvent
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import cn.nekocode.murmur.BuildConfig
 import cn.nekocode.murmur.R
@@ -128,8 +129,8 @@ class LoginFragment : DialogFragment(), Pikkel by PikkelDelegate() {
 
         dialog.setOnShowListener {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val email = emailEdit?.text.toString().trim()
-                val pwd = pwdEdit?.text.toString()
+                val email = emailEdit?.text?.toString()?.trim() ?: ""
+                val pwd = pwdEdit?.text?.toString() ?: ""
 
                 if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                     toast(R.string.email_invaild)
@@ -139,7 +140,11 @@ class LoginFragment : DialogFragment(), Pikkel by PikkelDelegate() {
 
                 } else {
                     callback?.onLoginClicked(email, pwd)
-                    dialog.dismiss()
+
+                    emailEdit?.let {
+                        val inputMethodManager = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        inputMethodManager.hideSoftInputFromWindow(it.windowToken, 0)
+                    }
                 }
             }
         }

@@ -19,4 +19,6 @@
 
     <string name="menu">Menu</string>
     <string name="toast_login_failed">Login failed.</string>
+    <string name="loging">Loging now …</string>
+    <string name="loading">Loading now …</string>
 </resources>

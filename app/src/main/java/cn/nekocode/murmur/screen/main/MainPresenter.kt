@@ -79,6 +79,8 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter, Pikkel
             if (session == null) {
                 view.showLoginDialog()
             } else {
+                view()?.showLoadingDialog(getString(R.string.loading))
+
                 // 刷新 Token
                 DoubanService.relogin(session ?: return)
                         .subscribeOn(Schedulers.io())
@@ -98,6 +100,7 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter, Pikkel
      * 登录错误时，重新展示对话框
      */
     fun onLoginError(ignored: Throwable) {
+        view()?.hideLoadingDialog()
         view()?.toast(getString(R.string.toast_login_failed))
         view()?.showLoginDialog()
     }
@@ -106,13 +109,16 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter, Pikkel
      * 点击了登录按钮之后
      */
     override fun onLoginClicked(email: String, pwd: String) {
-        // TODO progress
+        view()?.showLoadingDialog(getString(R.string.loging))
+
         DoubanService.login(email, pwd)
                 .subscribeOn(Schedulers.io())
                 .bindUntilEvent(this@MainPresenter, FragmentEvent.DESTROY_VIEW)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     session = it
+                    view()?.hideLoginDialog()
+                    view()?.showLoadingDialog(getString(R.string.loading))
                     DoubanService.getSongs(it)
                             .subscribeOn(Schedulers.io())
                             .setSongsToView()
@@ -142,6 +148,8 @@ class MainPresenter : BasePresenter<Contract.View>(), Contract.Presenter, Pikkel
                 .bindUntilEvent(this@MainPresenter, FragmentEvent.DESTROY_VIEW)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
+                    view()?.hideLoadingDialog()
+
                     itemPool.clear()
                     itemPool.addAll(it)
                     view()?.setAdapter(itemPool.adapter)

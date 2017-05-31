@@ -16,6 +16,7 @@
 
 package cn.nekocode.murmur.screen.main
 
+import android.app.ProgressDialog
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
@@ -40,6 +41,7 @@ class MainActivity : BaseActivity(), Contract.View, LoginFragment.Callback, Pikk
 
     var fabStatus by state(Contract.View.FAB_STATUS_RESUME)
     var loginFrg: LoginFragment? = null
+    var loadingDialog: ProgressDialog? = null
 
     var presenter: Contract.Presenter? = null
 
@@ -56,6 +58,9 @@ class MainActivity : BaseActivity(), Contract.View, LoginFragment.Callback, Pikk
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         loginFrg = fragmentManager.findFragmentByTag(TAG_LOGIN_FRG) as LoginFragment?
+        loadingDialog = ProgressDialog(this).apply {
+            setCancelable(false)
+        }
     }
 
     override fun onCreatePresenter(presenterFactory: PresenterFactory) {
@@ -128,11 +133,11 @@ class MainActivity : BaseActivity(), Contract.View, LoginFragment.Callback, Pikk
     }
 
     override fun showLoginDialog() {
-        if (loginFrg == null) {
-            loginFrg = LoginFragment()
+        val dialog = loginFrg ?: LoginFragment()
+        loginFrg = dialog
+        if (!dialog.isAdded) {
+            loginFrg?.show(fragmentManager, TAG_LOGIN_FRG)
         }
-
-        loginFrg?.show(fragmentManager, TAG_LOGIN_FRG)
     }
 
     override fun hideLoginDialog() {
@@ -141,5 +146,17 @@ class MainActivity : BaseActivity(), Contract.View, LoginFragment.Callback, Pikk
 
     override fun onLoginClicked(email: String, pwd: String) {
         presenter?.onLoginClicked(email, pwd)
+    }
+
+    override fun showLoadingDialog(message: String) {
+        val dialog = loadingDialog ?: return
+        dialog.setMessage(message)
+        if (!dialog.isShowing) {
+            dialog.show()
+        }
+    }
+
+    override fun hideLoadingDialog() {
+        loadingDialog?.dismiss()
     }
 }

@@ -45,6 +45,8 @@ interface Contract {
         fun setFABStatus(status: Int)
         fun showLoginDialog()
         fun hideLoginDialog()
+        fun showLoadingDialog(message: String)
+        fun hideLoadingDialog()
     }
 
     /**
