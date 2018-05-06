@@ -6,15 +6,15 @@
     <string name="login">Login</string>
     <string name="email_invaild">Your email address is invaild.</string>
     <string name="password_invaild">Your password is invaild.</string>
-    <string name="ensure_exit">Are you want to exit?</string>
+    <string name="ensure_exit">Do you want to exit?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
 
     <string name="about_description">
         <![CDATA[Murmur is an open source application.
-        <br>The source code in on <a href="https://github.com/nekocode/Murmur">Github</a>.
+        <br>The source code is on <a href="https://github.com/nekocode/Murmur">Github</a>.
         <br>
-        <br>Icon created by <a href="http://www.freepik.com/free-vector/world-radio-day-sunburst-background_1034131.htm">Freepik</a>]]>
+        <br>Launcher icon was created by <a href="http://www.freepik.com/free-vector/world-radio-day-sunburst-background_1034131.htm">Freepik</a>]]>
     </string>
 
     <string name="menu">Menu</string>
