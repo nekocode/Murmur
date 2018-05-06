@@ -3,11 +3,10 @@ apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion(COMPILE_SDK_VERSION.toInteger())
-    buildToolsVersion(BUILD_TOOLS_VERSION)
 
     defaultConfig {
         minSdkVersion 17
-        targetSdkVersion 25
+        targetSdkVersion 26
     }
 
     buildTypes {
@@ -26,24 +25,24 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    testCompile "org.robolectric:robolectric:3.3.2"
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    testImplementation 'junit:junit:4.12'
+    testImplementation "org.robolectric:robolectric:3.3.2"
 
     // Android support libraries
-    compile "com.android.support:support-annotations:$SUPPORT_LIBS_VERSION"
+    implementation "com.android.support:support-annotations:$SUPPORT_LIBS_VERSION"
 
     // Retrofit
     def retrofitVersion = "2.3.0"
-    compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
-    compile "com.squareup.retrofit2:converter-gson:$retrofitVersion"
-    compile "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
 
     // Storage library
-    compile 'io.paperdb:paperdb:2.0'
+    implementation 'io.paperdb:paperdb:2.0'
 
     // MediaPlyaer Proxy
-    compile 'com.danikula:videocache:2.7.0'
+    implementation 'com.danikula:videocache:2.7.0'
 
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$KOTLIN_VERSION"
 }

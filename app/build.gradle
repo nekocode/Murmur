@@ -4,11 +4,10 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion(COMPILE_SDK_VERSION.toInteger())
-    buildToolsVersion(BUILD_TOOLS_VERSION)
 
     defaultConfig {
         minSdkVersion 17
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0.0"
     }
@@ -36,58 +35,44 @@ android {
 
         buildTypes.release.signingConfig = null
     }
-
-    lintOptions {
-        disable 'GoogleAppIndexingWarning', 'UnusedResources' // Lint still does not detect usage of resources from Kotlin code.
-    }
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     // Data Layer
-    debugCompile project(path: ':data', configuration: "debug")
-    releaseCompile project(path: ':data', configuration: "release")
+    implementation project(':data')
 
     // Android support libraries
-    compile "com.android.support:appcompat-v7:$SUPPORT_LIBS_VERSION"
-    compile "com.android.support:recyclerview-v7:$SUPPORT_LIBS_VERSION"
-    compile "com.android.support:support-annotations:$SUPPORT_LIBS_VERSION"
-    compile "com.android.support:design:$SUPPORT_LIBS_VERSION"
-    compile "com.android.support.constraint:constraint-layout:1.0.2"
+    implementation "com.android.support:appcompat-v7:$SUPPORT_LIBS_VERSION"
+    implementation "com.android.support:recyclerview-v7:$SUPPORT_LIBS_VERSION"
+    implementation "com.android.support:support-annotations:$SUPPORT_LIBS_VERSION"
+    implementation "com.android.support:design:$SUPPORT_LIBS_VERSION"
+    implementation "com.android.support.constraint:constraint-layout:1.1.0"
 
     // Reactive library
-    compile "io.reactivex.rxjava2:rxkotlin:2.0.2"
-    compile "io.reactivex.rxjava2:rxandroid:2.0.1"
-    def rxLifecycleVersion = "2.0.1"
-    compile "com.trello.rxlifecycle2:rxlifecycle:$rxLifecycleVersion"
-    compile "com.trello.rxlifecycle2:rxlifecycle-android:$rxLifecycleVersion"
-    compile "com.trello.rxlifecycle2:rxlifecycle-components:$rxLifecycleVersion"
-    compile "com.trello.rxlifecycle2:rxlifecycle-kotlin:$rxLifecycleVersion"
+    implementation "io.reactivex.rxjava2:rxkotlin:2.0.2"
+    implementation "io.reactivex.rxjava2:rxandroid:2.0.1"
+    def rxLifecycleVersion = "2.1.0"
+    implementation "com.trello.rxlifecycle2:rxlifecycle:$rxLifecycleVersion"
+    implementation "com.trello.rxlifecycle2:rxlifecycle-android:$rxLifecycleVersion"
+    implementation "com.trello.rxlifecycle2:rxlifecycle-components:$rxLifecycleVersion"
+    implementation "com.trello.rxlifecycle2:rxlifecycle-kotlin:$rxLifecycleVersion"
 
     // DSL
     def ankoVersion = "0.9.1"
-    compile "org.jetbrains.anko:anko-sdk15:$ankoVersion"
-    compile "org.jetbrains.anko:anko-support-v4:$ankoVersion"
-    compile "org.jetbrains.anko:anko-appcompat-v7:$ankoVersion"
+    implementation "org.jetbrains.anko:anko-sdk15:$ankoVersion"
+    implementation "org.jetbrains.anko:anko-support-v4:$ankoVersion"
+    implementation "org.jetbrains.anko:anko-appcompat-v7:$ankoVersion"
 
     // Persist Instance State
-    compile 'com.github.yamamotoj:pikkel:0.3.3'
+    implementation 'com.github.yamamotoj:pikkel:0.3.3'
 
     // Tools
-    compile "com.github.nekocode:Meepo:0.1.5"
-    compile "com.github.nekocode:ItemPool:0.5.4"
-    compile "com.github.nekocode:DividerDrawable:1.2.1"
-    compile 'uk.co.chrisjenx:calligraphy:2.3.0'
+    implementation "com.github.nekocode:Meepo:0.2.1"
+    implementation "com.github.nekocode:ItemPool:0.5.4"
+    implementation "com.github.nekocode:DividerDrawable:1.2.1"
+    implementation 'uk.co.chrisjenx:calligraphy:2.3.0'
 
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
-}
-
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$KOTLIN_VERSION"
-    }
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$KOTLIN_VERSION"
 }

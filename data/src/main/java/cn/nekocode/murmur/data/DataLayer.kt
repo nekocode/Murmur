@@ -49,7 +49,6 @@ object DataLayer {
     const val DOUBAN_APP_GRANT_TYPE_PWD = "password"
     const val DOUBAN_APP_GRANT_TYPE_TOKEN = "refresh_token"
 
-    var CONTEXT: Context? = null
     var CLIENT: OkHttpClient? = null
     var GSON: Gson? = null
     var RETROFIT_LEANCLOUD: Retrofit? = null
@@ -60,8 +59,6 @@ object DataLayer {
 
 
     fun init(context: Context) {
-        DataLayer.CONTEXT = context.applicationContext
-
         CLIENT = OkHttpClient.Builder()
                 .cache(Cache(File(context.cacheDir, "okhttp"), 10 * 1024 * 1024L))
                 .connectTimeout(10, TimeUnit.SECONDS)
@@ -92,7 +89,7 @@ object DataLayer {
                 .client(CLIENT)
                 .build()
 
-        MEDIA_PROXY = HttpProxyCacheServer.Builder(CONTEXT)
+        MEDIA_PROXY = HttpProxyCacheServer.Builder(context)
                 .maxCacheSize(512 * 1024 * 1024)
                 .build()
 
