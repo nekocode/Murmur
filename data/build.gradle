@@ -16,8 +16,8 @@ android {
             buildConfigField 'String', 'TEST_PWD', "\"${getLocalProperty('TEST_PWD', '')}\""
         }
         release {
-            buildConfigField 'String', 'TEST_USER', ''
-            buildConfigField 'String', 'TEST_PWD', ''
+            buildConfigField 'String', 'TEST_USER', '\"\"'
+            buildConfigField 'String', 'TEST_PWD', '\"\"'
         }
     }
 

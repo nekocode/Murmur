@@ -84,11 +84,11 @@ class MainActivity : BaseActivity(), Contract.View, LoginFragment.Callback, Pikk
     }
 
     override fun setToolbarTitle(title: String) {
-        toolbar.title = title
+        supportActionBar?.title = title
     }
 
     override fun setToolbarSubtitle(subtitle: String) {
-        toolbar.subtitle = subtitle
+        supportActionBar?.subtitle = subtitle
     }
 
     override fun showToobar(show: Boolean) {
@@ -96,7 +96,7 @@ class MainActivity : BaseActivity(), Contract.View, LoginFragment.Callback, Pikk
     }
 
     override fun scrollToPosition(position: Int) {
-        recyclerView.smoothScrollToPosition(position) // FIXME
+        recyclerView.smoothScrollToPosition(position)
     }
 
     override fun setFABStatus(status: Int) {
@@ -152,6 +152,7 @@ class MainActivity : BaseActivity(), Contract.View, LoginFragment.Callback, Pikk
         val dialog = loadingDialog ?: return
         dialog.setMessage(message)
         if (!dialog.isShowing) {
+            // FIXME Window leak
             dialog.show()
         }
     }
